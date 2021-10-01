@@ -1,0 +1,3724 @@
+---
+title: "R Tips and Tricks"
+output:
+  html_document:
+    df_print: paged
+editor_options: 
+  chunk_output_type: inline
+  markdown: 
+    wrap: 72
+---
+
+```{r}
+library(tidyverse)
+library(remedy)# use to add-in for bold, list, heading etc
+library(datapasta)
+
+# https://www.rdocumentation.org/packages/datapasta/versions/3.1.0
+```
+
+## Superuseful
+
+```{r}
+#  {.tabset .tabset-fade .tabset-pills}
+ctrl+shit+P
+```
+
+```{r}
+Best keyboard shortcut I need to use daily
+
+# multi line select: Control + Shift + Up/Down arrows (Select and Edit Multiple Lines)
+# Control + Shift + F to search for files in a directory (Find in Files)
+# Alt + Shift +K to see all the shortcuts
+```
+
+## keyboard shortcut in RStudio that changed your life
+
+[Rstudio key board shortcut that changed your
+life](https://twitter.com/kc_analytics/status/1378770803454529538)
+
+-   Don't think I've seen this one in the replies yet but you can also
+    switch between tabs with **Ctrl+F11/F12**
+
+-   That's easy, **Cmd/Control + Shift + P** for the command palette!
+    (And then you don't have to remember any more shortcuts!)
+
+-   I'm forever with one finger on F3 and another on the mouse button
+    for replace. I might have to map a replace key someday!
+
+-   Alt + drag to make a multi-line cursor
+
+-   Ctrl+p put your cursor on an opening bracket and ctrl+p will take
+    this to its corresponding closing bracket
+
+-   alt + up/down: move selected line(s) up/down alt + shift + up/down:
+    copy selected line(s) up/down
+
+-   trl + L to clear the console
+
+-   I do like the insert sections shortcut ctrl+shift+r
+
+-   alt shift K to see them all
+
+-   Previous plot --- Cmd+Option+F11 Next plot --- Cmd+Option+F12
+
+-   Ctrl + 1 = focus on source file Ctrl + 2 = focus on console (used in
+    conjunction with previous to quickly iterate code)
+
+-   **Ctrl + Shift +1 = focus on source file AND make maximize that
+    window Ctrl + Shift + 2 = focus on console AND maximize that
+    window**
+
+    repeating the Ctrl + shift command brings the windows back to their
+    normal sizes.
+
+-   Install [\@MilesMcBain](https://twitter.com/MilesMcBain)
+    breakerofchains and assign a custom shortcut to "Break chain and run
+    to cursor" (I use Ctrl+Alt+Enter). No need to comment/uncomment
+    lines anymore
+
+-   Alt + ctrl + arrow to move to the next tab Ctrl + shift + A to
+    indent the selected code F2 to view the selected object Alt + enter
+    instead of ctrl + enter for the cursor to stay in the same code
+    chuck after running the current code chunk
+
+-   Alt + F4
+
+-   Ctrl + alt + i when used \*inside\* a code chunk will split it into
+    two chunks.
+
+-   place the cursor on (or highlight) the function you're interesting
+    in, and press "F1" - BAM! - context specific help... it's basically
+    the equivalent to the help() and ? function and it always blows my
+    mind people don't know about it.
+
+-   Ctrl + Alt + Shift + M = rename variables in current R script
+    (doesn't appear to work in RMarkdown
+
+-   cmd+D to delete a line opt+cmd+down to duplicate a line
+
+-   I will also add one I just found out: cmd+click to view an object!!!
+
+-   ctrl + shift + +. Anytime someone's presenting and the audience is
+    asking them to zoom in and they have no idea what menu it's in
+
+-   cmd+q, open terminal \$jupyter-notebook
+
+-   Ctrl + . to quickly find the right tab among bajillion open tabs
+
+-   Alt + up/down moves a line of code up or down
+
+-   <https://github.com/MilesMcBain/breakerofchains>
+
+-   Ctrl + Alt + B to run all code in a script above the cursor (usually
+    after Ctrl+Shift+F10 to restart R)
+
+-   Ctrl + Alt + B -run code from the Beginning upto cursor Ctrl + Alt +
+    E -run code from cursor to the end of script
+
+-   Shift + CMD + F10 to restart the R session
+
+-   Ctrl + Shift + F to search in the project's directory
+
+-   Ctrl + Shift + R to insert a section label.
+
+-   On MacOS: opt + cmd + enter
+
+    will send and run selection to terminal
+
+    Very useful when working with a remote R session on a headless
+    machine through ssh e.g. HPC cluster (if RStudio server is not
+    available)
+
+-   Cmd + shift + C to comment and Cmd + shift + O to open/close chunks
+    in my code . I now realise it's Cmd + option + O
+
+-   Ctrl + shift + m = %\>% Ctrl + shift + c = comment Ctrl + alt + i =
+    code chunk
+
+-   Cmd+option+shift+W = close all open tabs except for the current one
+    (alternately I could stop clicking on objects to look at them but
+    not sure that will ever happen
+
+    ![Upside-down face](https://abs-0.twimg.com/emoji/v2/svg/1f643.svg)
+
+    )
+
+-   Overwrite Cmd+D to make it "Quick Add Next". You can change multiple
+    instances of an expression at once but check that they're all
+    relevant (instead of using replace-all and praying). Shoutout to
+
+    [\@wfmackey](https://twitter.com/wfmackey) for this gem
+
+-   Control shift f10. Restart R, clear all variables in environment.
+    Good for a hard reset to sanity check the script.
+
+-   Ctrl Shift A to beautify your code
+
+-   Ctrl+Shift+F = search all R scripts (or any kind of file really)
+
+-   ctrl 0-9 completely changed the game for me. i'm so grateful i no
+    longer have to click between panes!
+
+-   Ctrl + P to jump to matching parenthese and Ctrl + Shift + Alt + E
+    to expand the selection to the matching parenthesis
+
+-   CMD/CTRL + A --\> Select All CMD/CTRL + SHIFT + A --\> Formats the
+    code
+
+-   Alt + O is nice if you use a lot of folding
+
+-   Ctrl Alt B to run all code up to your selection and holding Alt down
+    to select and edit multiple lines at the same time
+
+-   CTRL + Shift + / to easily reflow comments after updating
+    documentation... very useful!
+
+-   Open quotation marks ' ' + tab . Let's interactive navigation of
+    file/folder, and correctly specifying paths.
+
+-   Cmd + i +arrow indents code appropriatel (I'm obsessive about it)
+
+-   Learning about snippets for making my own shortcuts. Have loads now.
+
+-   On a Mac) Option + up or down arrow to move lines of code up or
+    down! V. handy for reordering
+    [\#ggplot](https://twitter.com/hashtag/ggplot?src=hashtag_click)
+    layers
+
+-   rl + A (select all) followed by Ctrl + Shift + A (format selected
+    code).
+
+    Quick and dirty code styling, made my life much better!
+
+-   Alt + - for the assignment operator \<-
+
+-   Using [\@rstudio](https://twitter.com/rstudio)'s addin snippets I
+    use ctrl+shift+v to paste path with reverse slashes
+    <https://github.com/sfr/RStudio-Addin-Snippets>
+
+-   ctrl + I Auto indent all the crap I wrote
+
+-   Ctrl + Shift + R to add a tidy section label
+
+-   Alt + O to fold all code (functions, loops, markdown chunks) and
+    Alt + Shift + O to unfold
+
+-   "Ctrl + Shift + k" to knit
+
+-   alt+o to close allll the sections at once
+
+-   Ctrl + . to search files or functions.
+
+-   Select next ocurrence, ctrl + d in VSCode but not mapped in RStudio
+    by default
+
+-   Ctrl + shift + N for a new R script
+
+-   Cursor on a function + F1 -\> opens help page
+
+-   Not unique to rstudio but let's not forget CMD +
+
+    to go the beginning and end of a file.
+
+-   Shift+Alt+Down to copy a line of code.
+
+-   ctrl + shift + + (zoom in) ctrl + - (zoom out)
+
+-   Ctrl + Shift + t from the datapasta package
+
+-   Re-run previous region: Ctrl+Alt+P
+
+-   Ctrl + Alt + F: keyword search in whole folder Ctrl + Alt + L:
+    pkgload::load_all() Ctrl + Alt + T: devtools::test()
+
+    \
+
+## Getting all the functions in a package
+
+```{r}
+#RStats Need to use a function from a package but unsure / have a vague recollection of its name? 
+# In RStudio: - Call help on the package name, for example: ?dplyr - Click the [Index] link at the bottom of the help page - Scroll through catalog to find what you're looking for
+library(dplyr)
+?dplyr
+help(package = "janitor")
+help(package = "dplyr")
+help(package = "tidyr")
+help(package = "purrr")
+help(package = "ggplot2")
+help(package = "rmarkdown")
+help(package = "knitr")
+help(package = "readxl")
+help(package = "writexl")
+help(package = "tidyxl")
+help(package = "unpivotr")
+help(package = "kableExtra")
+help(package = "tidyverse")
+help(package = "tidymodels")
+help(package = "shiny")
+help(package = "flexdashboard")
+help(package = "datapasta")
+help(package = "remedy")
+help(package = "ggeasy")
+help(package = "cowplot")
+help(package = "pointblank") #enables are data quality reporting and pipeline-based data validations. 
+
+```
+
+## Tables in R
+
+[github page with inks at the end of other table related
+packages](https://github.com/rstudio/gt) [gt package webpage with links
+at the end of other table related packages](https://gt.rstudio.com/)
+
+## Excel to R (Why)
+
+Can you please tell me what the R equivalent of those excel formulae
+actually are?
+
+-   I'd say that dplyr::join() can cover most cases of xlookup/vlookup,
+    with merge() handling the rest
+
+-   mutate to create new variables, filter to get subsets of data, and
+    group_by/summarise to create pivot tables.
+
+-   Get over the IIF and other uppercase functions in excel and move to
+    lower case. It took a while for the hangover to leave my head. I am
+    however indebted to Mike Gervin \@+ @excelisfun
+
+-   in learning the art of using excel. As said by others, find the
+    equivalent of index and match in R.
+
+-   Maybe not the very first thing but clipr::read_clip() and
+    clipr::write_clip() should be up there. Going back and forth between
+    the tools will make them comfortable and productive
+
+-   Open and save .xlsx
+
+```{r}
+file.choose()
+```
+
+### finding all functions in a package
+
+### tidyquant
+
+```{r}
+# to find out all the functions in a package user the help function for the package
+library(tidyquant)
+help(package = "tidyquant")
+```
+
+### VLOOKUP in R
+
+```{r}
+library(tidyquant)
+library(tidyverse)
+
+lookup_table <- tibble(
+    stock   = c("FB", "AMZN", "NFLX", "GOOG"),
+    company = c("Facebook", "Amazon", "Netflix", "Google")
+)
+
+```
+
+```{r}
+# --- Basic Usage ---
+
+VLOOKUP("NFLX",
+        .data = lookup_table,
+        .lookup_column = stock,
+        .return_column = company)
+```
+
+```{r}
+# --- Usage with tidyverse ---
+
+# Add company names to the stock data
+FANG %>%
+    mutate(company = VLOOKUP(symbol, lookup_table, stock, company))
+
+#  What to look up, where to look up, whcih column to look up and which column to return
+```
+
+Did you know, using "searcher" package, you could automatically to
+search stackoverflow , google, GitHub and many more sites for errors ,
+packages or topics. \#rstats
+
+```{r}
+library(searcher)
+search_google( 'ggplot 2 fix x-axis')
+```
+
+```{r}
+# f()
+search_google()
+```
+
+### [hrbraddins](https://gitlab.com/hrbrmstr/hrbraddins)Checkout this superuseful
+
+```{r}
+# Check later in the links above
+# install.packages("hrbraddins", repos = "https://cinc.rud.is")
+# library(hrbraddins)
+# hrbraddins::bare_combine(ACCES2, PLAN 5, PLAN 6, SAVE 4, SAVE 5, SAVE 6)
+# ACCES2, PLAN 5, PLAN 6, SAVE 4, SAVE 5, SAVE 6
+```
+
+```{r}
+# And the #rstats hero of my day today is janitor::tabyl - it's what you wish prop.table was. 😁😁😁 Thanks @samfirke and contributors.
+library(janitor)
+tabyl(mtcars$gear)
+
+```
+
+OR
+
+```{r}
+mtcars %>% 
+  tabyl(gear)
+```
+
+\#\#\#**If you only need to use one single function once, you don't need
+to load an entire package. You can write the following:**
+
+**dplyr::full_join(A, B)** **using the :: operator, you can access
+functions from packages without having to load the whole package
+beforehand.**
+
+### [Owning Outlines in RStudio](https://www.natedayta.com/2019/12/25/owning-outlines-in-rstudio/)
+
+Take advantage of organizing your R scripts in RStudio with these
+outline tips and tricks.
+
+See the outline Be the outline. RStudio doens't start with the outline
+shown by default (I really wish it did) so you have to open it each
+time, but it's easy.
+
+Press the grey button in the upper right of the editor pan with 5 offset
+dark-grey lines to show/hide the outline. You can also toggle the
+outline with the keyboard shortcut:
+
+Control+ Shift+ O
+
+Label sections Like really, just do it. RStudio makes adding section
+labels super simple, so you don't have a good excuse not too. To insert
+a new label you can use helper via the keyboard short cut:
+
+Control+Shift+R
+
+Alteatively, you can type 4 (or more) hypens or pounds at the end of a
+comment to make it a section label.
+
+#### 1 Import
+
+```{r}
+read.table('clipboard', ...)
+```
+
+# \^\^\^ Rstudio's helper pads with hyphens to col 76
+
+# 2 Clean ----
+
+# \^\^\^ Or you can type 4-hyphens yourself
+
+# Plot
+
+# \^\^\^ Or 4-pounds, but please don't
+
+Label sub-sections This part is not natively supported by RStudio's
+outline, but I think it's a super useful hack and easy enough to do that
+I still reccomend it.
+
+I'll denote a sub-section by prepending a section label with \* (note
+there should be a trailing space). This works well for extending further
+into sub-sub-sections and I think it renders cleanly in the outline pane
+too.
+
+# 1 Import ----------------------------------------------------------------
+
+# \* 1.1 Databases ---------------------------------------------------------
+
+# \* \* 1.1.1 Postgres ------------------------------------------------------
+
+Label functions Functions self-label, so you just consider the section
+you want to define them in. Whenever you write a new function, it will
+add itself as a child to the section label above it in the outline. If a
+function has internal functions, those will added as children of the
+top-level function.
+
+Navigate labels Rstudio has multiple ways to do this part. The "easiest"
+is to click on any label in the outline sidebar and the editor whisks
+you away!
+
+If for some reason you closed the outline, you can use the selector at
+the lower left of the editor pane. It will be displaying the current
+section label or function name. You can also use a keyboard shortcut to
+open this selector without the mouse-click:
+
+Cmd+ Alt+ Shift+ J
+
+Then uses up/down arrows to select a section and Enter to jump there.
+
+Fold labels Sometimes it can be helpful to fold or hide code while you
+work on another section. Any section that appears in the ouline can be
+collapsed by clicking the dark-grey down arrow at the starting line in
+the row index area on the right of the editor pane.
+
+And of course there is a keyboard shortcut to accomplish the same:
+
+Cmd+ Alt+ L
+
+Unfold labels Clicking the now horizontal arrow in the row index area
+with unfurl folded sections. The keyboard short is the same as above but
+with Shift added:
+
+Cmd+ Alt+ Shift+ L
+
+Example outline I mocked up [a small example .r
+file](https://gist.github.com/nathancday/b7308a40bc7173be6e4191675092f84d)
+to show all of these together. Just open in RStudio to explore and I
+hope you enjoy the perks of outlining your Rscripts!
+
+## RStudio
+
+```{r code snippet}
+# Code snippet
+adder <- function(x, y) {
+  x+y
+}
+```
+
+Very hand shortcut Ctrl + . to find all files, objects wihtin a project
+
+Another very useful command is ctrl+shift+f to find any file inside any
+directories or ctrl + F same thing.
+
+Use " " to see your file structure
+
+```{r}
+"hit tab inside this"
+```
+
+```{r}
+""
+```
+
+dont close tabs individually, instead of that go to file and close all
+tabs except current tab n there is a key shortcut for that too.
+ctrl+shift+alt+W
+
+Ctrl + Shift + .
+
+CtrAltShift + K for all shortcuts
+
+DplIncrease or decrease the size of the windows with Control ++ or
+Control --
+
+yr/Datawrangling
+
+**rstats tip of the day: You can use the argument suffix to change what
+gets appended to column names that appear in both tables in a dplyr join
+from .x and .y to whatever you like!**
+
+```{r}
+library(tidyverse)
+iris <- iris %>% 
+  rownames_to_column(var = "id")
+  
+```
+
+## RStudio and R Markdown tips n tricks
+
+<https://www.r-bloggers.com/2020/01/tips-and-tricks-in-rstudio-and-r-markdown-2/>
+\` \#\#\# Code snippets Code snippets is usually a few characters long
+and is used as a shortcut to insert a common piece of code. You simply
+type a few characters then press Tab and it will complete your code with
+a larger code. Tab is then used again to navigate through the code where
+customization is required. For instance, if you type fun then press Tab,
+it will auto-complete the code with the required code to create a
+function:
+
+name \<- function(variables) {
+
+} Pressing Tab again will jump through the placeholders for you to edit
+it. So you can first edit the name of the function, then the variables
+and finally the code inside the function (try by yourself!).
+
+There are many code snippets by default in RStudio. Here are the code
+snippets I use most often:
+
+lib to call library() library(package) mat to create a matrix
+matrix(data, nrow = rows, ncol = cols) if, el, and ei to create
+conditional expressions such as if() {}, else {} and else if () {} if
+(condition) {
+
+} else {
+
+} else if (condition) {
+
+} fun to create a function name \<- function(variables) {
+
+} for to create for loops for (variable in vector) {
+
+} ts to insert a comment with the current date and time (useful if you
+have very long code and share it with others so they see when it has
+been edited) \# Tue Jan 21 20:20:14 2020 ------------------------------
+shinyapp every time I create a new shiny app library(shiny) ui \<-
+fluidPage(
+
+) server \<- function(input, output, session) {
+
+} shinyApp(ui, server) You can see all default code snippets and add
+yours by clicking on Tools \> Global Options... \> Code (left sidebar)
+\> Edit Snippets...
+
+### Reformat code
+
+```{r}
+# Select any code chunk and use: Ctrl +Shift + A
+
+
+1 + 1
+for (i in 1:10) {
+  if (!i %% 2) {
+    next
+  }
+  print(i)
+}
+```
+
+### RStudio addins
+
+```{r}
+
+```
+
+### Extract equation model with
+
+{equatiomatic} If you often need to write equations corresponding to
+statistical models in R Markdown reports, the {equatiomatic} will help
+you to save time.
+
+Here is a basic example with a multiple linear regression using the same
+dataset as above (i.e., diamonds from {ggplot2}):
+
+```{r}
+library(ggplot2)
+dat <- diamonds
+# install.packages("equatiomatic")
+library(equatiomatic)
+# fit a basic multiple linear regression model
+model <- lm(price ~ carat + depth,
+            data = dat)
+extract_eq(model,
+           use_coefs = TRUE)
+```
+
+```{r}
+library(ggplot2)
+dat <- diamonds
+# install.packages("equatiomatic")
+library(equatiomatic)
+# fit a basic multiple linear regression model
+model <- lm(price ~ carat + depth,
+            data = dat)
+extract_eq(model,
+           use_coefs = TRUE)
+```
+
+If the equation is long, you can display it on multiple lines by adding
+the argument
+
+wrap = TRUE
+
+```{r}
+
+
+model <- lm(price ~ carat + x + y + z + depth,
+            data = dat)
+extract_eq(model,
+           use_coefs = TRUE,
+           wrap = TRUE
+           )
+
+
+```
+
+Note that:
+
+-   If you use it in R Markdown, you need to add results = 'asis' for
+    that specific code chunk, otherwise the equation will be rendered as
+    a LaTeX equation
+
+-   At the time of writing, it works only for PDF and HTML output and
+    not for Word
+
+-   The default number of terms per line is 4. You can change that with
+    the terms_per_line argument:
+
+    ```{r}
+    extract_eq(model,
+               use_coefs = TRUE,
+               wrap = TRUE,
+               terms_per_line = 2)
+    ```
+
+    -   {equatiomatic} supports output from logistic regression as well.
+        See all supported models in the
+        [vignette](https://cran.r-project.org/web/packages/equatiomatic/vignettes/intro-equatiomatic.html)
+
+    -   If you need the theoretical model without the actual parameter
+        estimates, remove the use_coefs argument:
+
+```{r}
+extract_eq(model,
+           wrap = TRUE)
+```
+
+In that case, I prefer to use β0β0 as intercept instead of αα. You can
+change that with the
+
+intercept = "beta"
+
+argument:
+
+```{r results = 'asis'}
+extract_eq(model,
+           wrap = TRUE,
+           intercept = "beta")
+```
+
+## tidyverse
+
+### 10 Tricks for tidyverse in R
+
+Just happened to come across this tweet about David Robinson's talk on
+"Ten Tremendous Tricks for Tidyverse". It looked like a fantastic and
+useful talk. These ten tricks involve tidyverse functions one may not
+have heard of or thought of using in a scenario. The first four
+tidyverse tips is about counting and summarizing, next three tidyverse
+tips is about visualization with ggplot2 and the last three is all about
+tidyr functions.
+
+All ten tricks are extremely handy and we have already seen many of
+these tips in our blog before. Still, it is fun put them to use.
+
+In this post, we will see examples all ten tricks for tidyverse with
+self contained code chunk for each trick. This is an attempt to show the
+examples of ten tricks without attending the talk. If you really want to
+learn more tips, make sure to check out David Robinson's Tidy Tuesday
+screencast exploring TidyTuesday datasets.
+
+Let us first load tidyverse and set gggplot theme to theme_bw()
+
+```{r}
+library(tidyverse)
+library(broom)
+theme_set(theme_bw())
+```
+
+Let us load gapminder data with CO2 emission directly from the web.
+
+```{r}
+co2_data <- "https://raw.githubusercontent.com/cmdlinetips/data/master/gapminder_data_with_co2_emission.tsv"
+gapminder_co2 <- read_tsv(co2_data)
+```
+
+**Tidyverse Trick 1: count()** Count() function in dplyr basically
+counts the number of occurrences specific variable. For example, in
+gapminder data if we want to get number of countries per continent, we
+simply use count(continent).
+
+```{r}
+gapminder_co2 %>% 
+  count(continent)
+```
+
+Without count() function you probably have to group_by continent and
+summarise to get the results shown above.
+
+**Tidyverse Trick 2: count() with three arguments** Count can take
+multiple arguments. For example, We can specify the name of the new
+count column that we created with count function using name argument. We
+can sort the results in descending order with sort argument. Also we can
+use wt argument to get sum of a variable instead of simple count.
+
+For example, if we wanted total population for each continent and each
+year, we can use count with the three arguments as follows.
+
+```{r}
+gapminder_co2 %>% 
+  count(continent, year, wt=pop,
+        name="total_pop", sort=TRUE)
+```
+
+Without using count(), we would first have to use group_by(),
+summarize() and sort in three steps as follows to get the same results.
+
+```{r}
+gapminder_co2 %>% 
+  group_by(continent, year) %>%
+  summarize(total_pop=sum(pop)) %>%
+  arrange(desc(total_pop))
+```
+
+**Tidyverse Trick 3: add_count()** Another useful function in the
+similar flavor as count() is add_count(). add_count() function with a
+variable as its argument adds a new column containing number of elements
+in group.
+
+For example, with gapminder data, when we use add_count(continent), the
+function will create a new column with name n containing number of
+elements in each continent.
+
+```{r}
+gapminder_co2 %>% 
+  select(continent, lifeExp) %>% 
+  add_count()
+```
+
+Here we have selected just two columns from gapminder data for clarity.
+Note, all rows corresponding to the continent Asia will have the number
+of rows of Asia in the data.
+
+**Tidyverse Trick 4: summarize() with list columns()**
+
+summarize() is one of the core verbs of tidyverse from dplyr. It is
+mainly used to compute some summary statistics. However, it is handy to
+create list columns and use it when building many statistical models.
+
+Let us use our gapminder data to model how each continent's total
+population grew over years by building a linear model using lm.
+
+Let us first compute total population per year for each continent using
+the count() function above.
+
+```{r}
+df <- gapminder_co2 %>% 
+  count(continent, year, wt=pop,
+        name="total_pop", sort=TRUE) 
+```
+
+Let us build this example step by step to see how we can use summarize
+function to create list columns and how to use the list columns to
+perform analysis with many models. In this example, we will make effect
+plot showing estimate for each continent with its confidence intervals
+
+At first we use summarize to create a list column variable containing
+linear model for each continent.
+
+```{r}
+df %>%
+  group_by(continent) %>%
+  summarise(lm_mod= list(lm(total_pop ~year)))
+```
+
+We can see that, now we have a new tibble with list column for the
+linear model.
+
+Let us use tidy function from broom to get the results from linear model
+for each continent in tidy form with confidence intervals for estimate.
+
+```{r}
+df %>%
+  group_by(continent) %>%
+  summarise(lm_mod= list(lm(total_pop ~year))) %>%
+  mutate(tidied = map(lm_mod,tidy,conf.int = TRUE)) 
+```
+
+This creates another list column contatining a small tibble for each
+continent with linear model results in tidy form.
+
+Let us unnest() the list column "tidied". This will give us estimates
+from linear model for each continent. One for intercept and one for the
+slope estimate.
+
+```{r}
+df %>%
+  group_by(continent) %>%
+  summarise(lm_mod= list(lm(total_pop ~year))) %>%
+  mutate(tidied = map(lm_mod,tidy,conf.int = TRUE)) %>%
+  unnest(tidied)
+```
+
+Now we have our estimates from multiple linear models.
+
+And we are ready to make the co-efficient plot with estimate and
+confidence intervals for estimate.
+
+```{r}
+df %>%
+  group_by(continent) %>%
+  summarise(lm_mod= list(lm(total_pop ~year))) %>%
+  mutate(tidied = map(lm_mod,tidy,conf.int = TRUE)) %>%
+  unnest(tidied) %>%
+  filter(term!="(Intercept)") %>%
+  ggplot(aes(estimate,continent)) +
+  geom_point()+
+  geom_errorbarh(aes(xmin=conf.low, xmax=conf.high,height = .3)) +
+  labs(title="Total population per continent over years") + theme_bw(base_size=16)
+```
+
+Tidyverse Trick 5: fct_reorder() + geom_col() + coord_flip()
+
+Bar plots are a great way to quickly visualize counts or specific
+quantity across multiple categories. However, the barplots can be harder
+to interpret if it is not ordered properly. Check out the earlier for
+tips to make better plots here. One of the tricks is to combine barplots
+made using geom_col() with fct_reorder() and coord_flip().
+
+Let us see an example using gapminder data and make a barplots for the
+amount of CO2 emission per continent for the year 2007.
+
+Within ggplot()'s aes() function we order continents based on their CO2
+emission values. Also we use geom_col() to make the barplot with
+coord_flip(). Flipping the axis is of great use to make the labels on x
+axis legible.
+
+```{r}
+gapminder_co2 %>% 
+  filter(year==2007) %>%
+  count(continent, wt=co2, name="total_co2") %>%
+  ggplot(aes(x=fct_reorder(continent,total_co2),y=total_co2))+
+  geom_col()+
+  labs(x="Continent", title="Total CO2 emmission for year 2007")+
+  coord_flip()
+```
+
+Tidyverse Trick 6: fct_lump() Often while working dataset with a
+variable with numerous factors, a quick standard barchart or boxplot to
+understand the trend of a variable with so many levels can get really
+cumbersome. One of the solutions is to focus only on the top factors.
+The forcats library in tidyverse has a nice function fct_lump() that can
+lump the bunch of uninteresting factors in to a single factor easily.
+
+Let us see an example of how to use fct_lump() to lump factors in to a
+new "other" category and visualize using barplot like the example above.
+Let us use a dataset on "big" car economy dataset from Tidy Tuesday
+project.
+
+```{r}
+big_epa_cars <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-15/big_epa_cars.csv")
+```
+
+This dataset contains a large number of car makers with their fuel
+economy for each of their models. Let us make a quick exploratory
+barplot with each car maker and the number of models they have.
+
+```{r}
+big_epa_cars %>% 
+  select(make) %>%
+  ggplot(aes(x=fct_rev(fct_infreq(make))))+
+  geom_bar() +
+  labs(x="Car Make")+
+  coord_flip()+
+  theme_bw(base_size=16)
+```
+
+We can immediately see that that the barplot is worthless, because there
+are a lot of car makers with just one or two models.
+
+Typically one might be interested in the carmakers with lot of car
+models. A better way to visualize is to use fct_lump() to group all car
+makers with low number of models in to a single category.
+
+For example, if we want to keep only the top 5 makers and lump the
+remaining carmakers into one big group, we would use fct_lump() like
+shown below.
+
+```{r}
+big_epa_cars %>% 
+  select(make) %>%
+  mutate(make_lumped = fct_lump(make,5))
+```
+
+Basically, we used fct_lump() to create a new variable containing the
+top factors and lumping rest into factor called "other".
+
+Now we can make the barplot that we wanted. This time we would use the
+newly created variable from fct_lump().
+
+```{r}
+big_epa_cars %>% 
+  select(make) %>%
+  mutate(make_lumped = fct_lump(make,35)) %>%
+  ggplot(aes(x=fct_rev(fct_infreq(make_lumped))))+
+  geom_bar() +
+  labs(x="Car Make")+
+  coord_flip()
+```
+
+In this fct_lump() example, we keep the top 35 factors. And we can see
+the top factors much clearly
+
+Tidyverse Trick 7: scale_x/y_log10() Often when making plots,
+visualizing them on log scale can easily reveal the trend in the data.
+For example, scatter plots are great way to visualize the relationship
+between two quantitative variables. However, sometimes the real
+relationship between two variables may not be easily visible.
+
+Let us use gapminder data to make scatter plot between gdpPercap and
+lifeExp.
+
+```{r}
+gapminder_co2 %>% 
+  ggplot(aes(x=gdpPercap,y=lifeExp))+
+  geom_point() 
+```
+
+We can see that our scatter plot is kind of squished along x-axis due to
+big gdpPercap outliers.
+
+We can make the x-axis log scale in ggplot2 with scale_x\_log10().
+
+```{r}
+gapminder_co2 %>% 
+  ggplot(aes(x=gdpPercap,y=lifeExp))+
+  geom_point() +
+  scale_x_log10()
+```
+
+Thanks to the log scale on x-axis, now we can easily see the linear
+trend clearly.
+
+When needed, we can also scale the y axis to log scale with
+scale_y\_log10() function in ggplot2.
+
+**Tidyverse Trick 9: separate()**
+
+The last two tips in tidyverse is two related functions. The first is
+separate() function in tidyr can be of great help when you want to
+convert a single character column in a data frame into one or more
+character columns. It is a great way to parse a complicated text column
+into simple one(s).
+
+Let us consider a simple example where we first create a data frame with
+a character column.
+
+```{r}
+df <- data.frame(period=c("Q1_y2019","Q2_y2019", "Q3_y2019","Q4_y2019"),
+                 revenue=c(23,24,27,29))
+```
+
+Here we have a character column, "period" that has two tokens separated
+by under score.
+
+We can separate the single character columns in two columns using
+separate() function. All you need to do is specify the names of the
+columns you want and optionally specify how you want to split the
+original character column using "sep" argument.
+
+```{r}
+df %>% 
+   separate(period,c("Quarter","Year"))
+```
+
+In this example, we use default delimiter to get two columns from a
+single column. The argument sep can take regular expression to split the
+column. Now we have two new columns made from the original column.
+
+**Tidyverse Trick 10: extract()** extract from tidyr is another tidyr
+function that is of the same flavor as separate(). extract() is bit more
+powerful as one can use regular expression to extract patterns of
+interest from column containing text and create one or more new columns.
+
+For example, using the same sample dataframe, we can extract the quarter
+and year information alone using extract() function with regular
+expression for the pattern we want to extract.
+
+```{r}
+df %>% 
+   extract(period,c("Quarter","Year"),"Q(.*)_y(.*)")
+```
+
+Here we extracted Quarter information starting with Q and year
+informartion starting with y and the resulting data frame would look
+like this.
+
+## 9 Ways To Create New Variables with tidyverse
+
+When one wants to create a new variable in R using tidyverse, dplyr's
+mutate verb is probably the easiest one that comes to mind that lets you
+create a new column or new variable easily on the fly. It is probably
+the go to command for every time one needed to make new variable for
+many people. However, dplyr's mutate is not the only way to create new
+variable. Tidyverse has a host of useful commands that can be extremely
+useful for create new variables in different scenarios. In this post, we
+will see examples of 9 ways to create new variables with tidyverse.
+
+Let us load tidyverse packages and gapminder package. We will use the
+gapminder data frame from the gapminder data frame.
+
+```{r}
+library(tidyverse)
+library(gapminder)
+```
+
+Let us filter gapminder dataframe so that we have just three
+columns/variables and just 4 rows of data.
+
+```{r}
+gapminder <- gapminder %>%
+  select(country,year,pop) %>%
+  head(n=4)
+```
+
+1.  Mutate With the easy to use mutate verb, one can create a new
+    variable, in this example, pop_in_mill from "pop" as follows. You
+    can see that the resulting data frame has the new column
+    "pop_in_mill".
+
+```{r}
+gapminder %>%
+  mutate(pop_in_mill= pop/1e06)
+```
+
+2.  transmute Sometimes, one may want to create a new variable, but not
+    interested in the original variables that are present in the data
+    frame. In those cases, relatively unknown tidyverse verb transmute
+    is very useful. In this example, we create a new variable
+    "pop_in_mill" with transmute. Note that the resulting data contains
+    only the new variable, nothing else.
+
+```{r}
+gapminder %>% 
+  transmute(pop_in_mill=pop/1e06)
+```
+
+3.  mutate_at dplyr also has mutate_at verb that can very useful to make
+    changes at a specific column in a data frame. In this simple example
+    illustrating mutate_at, we specify the column we want to change and
+    a function for how to change the variable. Note that it does create
+    a name, instead new column with the same name.
+
+```{r}
+gapminder %>% 
+  mutate_at(c("pop"), function(x){x/1e6})
+```
+
+The verb mutate_at can be extremely useful in the scenarios where you
+want to change multiple columns with some sort of pattern in their names
+with a certain rule.
+
+4.  mutate_if The mutate_if is a very useful verb when one is interested
+    in checking a condition and change the column if the condition is
+    met. In the dummy example below, we use mutate_if to check if a
+    column is of integer type and change it to character type.
+
+Note that now the resulting data frame does not have any column with
+integer as type.
+
+```{r}
+gapminder %>%
+  mutate_if(is.integer, as.character)
+```
+
+5.  mutate_all mutate_all is another useful verb that can used to change
+    every column. In the below example, we change the type of every
+    column to character, regardless of their initial type.
+
+```{r}
+gapminder %>%
+  mutate_all(funs(as.character))
+```
+
+6.  add_column The latest versions of tibble has a very convenient
+    function called add_column() that helps adding a new column quickly
+    on the fly. The add_column() function will not change the existing
+    data and also one can not overwrite existing columnn.
+
+```{r}
+gapminder %>% 
+  add_column(id=1:4)
+```
+
+The add_column() fucntion also has the arguments before and after. One
+can use them to specify where the new column should be.
+
+7.  add_count add_count() is a very convenient function that helps
+    quickly count based a variable. For example, if we want to add
+    column specifying the number of country entries for each value of
+    the "country" variable, we can use add_count(country) as shown
+    below. The add_count() function will groub_by each country and get a
+    tally count. This count will be added as new column with name "n".
+
+```{r}
+gapminder %>% 
+  add_count(country)
+```
+
+8.  add_tally The function add_tally() adds a column n to a table based
+    on the number of items within each existing group.
+
+```{r}
+gapminder %>% 
+  add_tally()
+```
+
+9.  rename Often we would like rename a column. This is not adding new
+    column per say, but a old column gets renamed. The rename function
+    is very handy to make such column name changes.
+
+One specifies the new column as an argument to rename function with the
+old name as follows. Here "population" is the new name and "pop" is the
+old column in the data frame.
+
+```{r}
+gapminder %>% 
+  rename(population=pop)
+```
+
+### Two tidyverse trick
+
+```{r}
+library(tidyverse)
+cocktails <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-26/cocktails.csv')
+```
+
+#### add_count
+
+```{r}
+cocktails %>% 
+  add_count(drink) %>% 
+  filter(n >= 12) %>% 
+  knitr::kable()
+```
+
+#### crossing
+
+generates all possible combinations of variables (like expand.grid, but
+returns a dataframe)
+
+```{r}
+crossing(
+  a = 1:2,
+  b = c("a", "b"),
+  c = c("x", "y")
+) %>% 
+  knitr::kable()
+```
+
+## 10 Tidyverse Functions - \#2 Across (w/ Group By + Summarize) \| R-Tip 009
+
+<https://www.youtube.com/watch?v=6fEowYTlNT8&feature=youtu.be&utm_source=Business+Science+-+Combined+List&utm_campaign=39c1ab56f1-TUES_TIPS_009_tidyverse_across&utm_medium=email&utm_term=0_a4e5b7c52f-39c1ab56f1-70778887&mc_cid=39c1ab56f1&mc_eid=38d91c3e27>
+
+<https://github.com/business-science/free_r_tips/blob/master/009_tidyverse_across/009_tidyverse_across.R>
+
+```{r}
+library(tidyverse)
+mpg %>% View()
+```
+
+SUMMARIZE W/ ACROSS ---- Group By + Summarize: Super common
+summarization pattern Summarize + Across: Scale your summarizations:
+Multiple columns Multiple Summary Functions (e.g. mean, sd)
+
+### Summarize by one column and one function
+
+```{r}
+# * AVERAGE CITY FUEL CONSUMPTION BY VEHICLE CLASS ----
+mpg %>%
+    group_by(class) %>%
+    summarise(
+        across(cty, .fns = mean),
+        .groups = "drop"
+    )
+```
+
+```{r}
+# * AVERAGE & STDEV CITY FUEL CONSUMPTION BY VEHICLE CLASS
+mpg %>%
+    group_by(class) %>%
+    summarise(
+        across(cty, .fns = list(mean = mean, stdev = sd)), .groups = "drop"
+    )
+
+```
+
+```{r}
+# * AVERAGE & STDEV CITY + HWY FUEL CONSUMPTION BY VEHICLE CLASS
+mpg %>%
+    group_by(class) %>%
+    summarise(
+        across(c(cty, hwy), .fns = list(mean = mean, stdev = sd)), .groups = "drop"
+    )
+```
+
+```{r}
+# 2.0 ADVANCED ----
+#CUSTOMIZE NAMING SCHEME ----
+mpg %>%
+    group_by(class) %>%
+    summarise(
+        across(
+            c(cty, hwy),
+            .fns = list(mean = mean, stdev = sd),
+            .names = "{.fn} {.col} Consumption"
+        ),
+        .groups = "drop"
+    ) %>%
+    rename_with(.fn = str_to_upper)
+```
+
+```{r}
+# * COMPLEX FUNCTIONS ----
+mpg %>%
+    group_by(class) %>%
+    summarise(
+        across(
+            c(cty, hwy),
+            .fns = list(
+                "mean"     = ~ mean(.x),
+                "range lo" = ~ (mean(.x) - 2*sd(.x)),
+                "range hi" = ~ (mean(.x) + 2*sd(.x))
+            ),
+            .names = "{.fn} {.col}"
+        ),
+        .groups = "drop"
+    ) %>%
+    rename_with(.fn = str_to_upper)
+```
+
+### Data cleaning
+
+##### R & Data Manipulation ffers a wide range of options for dealing with dirty data. The collection of packages known as the tidyverse, and adjacent packages that take a "tidy" approach, provide a range of functionality. From importing to cleaning to reshaping, these packages can help you quickly and efficiently clean messy data.
+
+ggpThe tidyverse has a collection of packages to deal with messy data
+(see dplyr and tidyr in particular) AND a philosophy that helps you in
+doing so
+
+\#\#PURRR i.e. purrr \#\#\# group_walk Yesterday my boss asked me to
+separate data so each member had their own data file. For a moment I
+thought of using Excel but thought "\#rstats can easily do that"
+
+You can even use the {gt} Packageto save pdfs!
+<https://twitter.com/Edgar_Zamora_/status/1405559489663684610>
+
+```{r}
+library(tidyverse)
+library(gt)
+library(writexl)
+# writing files
+ggplot2::diamonds %>% 
+  group_by(color) %>% 
+  group_walk(~write.csv(.x, file = paste0(.y$color, ".csv")))
+
+### check later why its not working for xlsx writing
+ggplot2::diamonds %>% 
+  group_by(color) %>% 
+  group_walk(~write_xlsx(.x, file = paste0(.y$color, ".xlsx")))
+
+# saving gt tables
+ggplot2::diamonds %>% 
+  group_by(color) %>% 
+  group_walk(~.x %>% 
+               gt() %>% 
+               gtsave(., filename = paste0(.y$color, ".pdf"), 
+                      zoom = .85))
+```
+
+\#\#DPLYR/dplyr
+
+##### dplyr::summarise_at()
+
+```{r}
+df <- tribble(
+  ~date,        ~temperature, ~precipitation, ~humidity,
+  "2020-03-06", 3,            0.60,           0.76,
+  "2020-03-07", 3,               0,           0.57,
+  "2020-03-08", 9,               0,           0.57,
+  "2020-03-09", 11,           0.30,           0.69
+)
+```
+
+```{r}
+# Use summarise_at() to summarise variables by referring to them by name
+df %>%
+  summarise_at(vars(temperature, precipitation), mean)
+```
+
+```{r}
+# If you want to use more than one summary function, pass a list of functions:
+df %>%
+  summarise_at(vars(temperature, precipitation), list(mean = mean, max = max))
+```
+
+```{r}
+# Use summarise_if() to summarise variables meeting a specific criteria:
+df %>%
+  summarise_if(is.numeric, min)
+```
+
+```{r}
+# Use summarise_all() to summarise all variables!
+df %>%
+  summarize_all(as.character)
+
+# mutate() versions exist too!
+```
+
+#### dplyr::across()
+
+```{r}
+library(dplyr)
+packageVersion("dplyr") # I'm on dev! Install from https://github.com/tidyverse/dplyr
+
+```
+
+```{r}
+df <- tribble(
+  ~date,        ~temperature, ~precipitation, ~humidity,
+  "2020-03-06", 3,            0.60,           0.76,
+  "2020-03-07", 3,               0,           0.57,
+  "2020-03-08", 9,               0,           0.57,
+  "2020-03-09", 11,           0.30,           0.69
+)
+```
+
+```{r}
+# Sorry, but the summarise_() and mutate_() scoped functions are cancelled!
+# Let's use across() instead :)
+
+# Refer to variables by name using c() instead of vars():
+df %>%
+  summarise(across(c(temperature, precipitation), mean))
+```
+
+```{r}
+# To summarise variables meeting a specific condition:
+df %>%
+  summarise(across(is.numeric, max))
+```
+
+```{r}
+# Pass multiple functions the same way!
+df %>%
+  summarise(across(is.numeric, list(min = min, max = max)))
+```
+
+```{r}
+# You can control how the output is named, too!!!!
+df %>%
+  summarise(across(is.numeric, min, names = "min_{col}"))
+```
+
+```{r}
+df %>%
+  summarise(across(c(temperature, humidity), list(mean = mean, sd = sd), names = "{fn}_of_{col}"))
+```
+
+```{r}
+# The default is to summarise everything (like summarise_all)
+# Make sure to specify the function under the `fns` argument if you want that
+df %>%
+  summarise(across(fns = as.character))
+```
+
+```{r}
+# otherwise it'll try to pass it to the first argument, `cols`!
+df %>%
+  summarise(across(as.character))
+```
+
+#### dplyr:: across
+
+[applying dplyr functions simultaneously across multiple
+columns](http://www.rebeccabarter.com/blog/2020-07-09-across/)
+
+With the introduction of dplyr 1.0.0, there are a few new features: the
+biggest of which is across() which supersedes the scoped versions of
+dplyr functions.
+
+I often find that I want to use a dplyr function on multiple columns at
+once. For instance, perhaps I want to scale all of the numeric variables
+at once using a mutate function, or I want to provide the same summary
+for three of my variables.
+
+While it's been possible to do such tasks for a while using [scoped
+verbs](http://www.rebeccabarter.com/blog/2019-01-23_scoped-verbs/), it's
+now even easier - and more consistent - using dplyr's new across()
+function.
+
+```{r}
+# remotes::install_github("allisonhorst/palmerpenguins")
+library(palmerpenguins)
+library(tidyverse)
+penguins
+```
+
+There are 344 rows in the penguins dataset, one for each penguin, and 7
+columns. The first two columns, species and island, specify the species
+and island of the penguin, the next four specify numeric traits about
+the penguin, including the bill and flipper length, the bill depth and
+the body mass.
+
+**The new across() function turns all dplyr functions into "scoped"
+versions of themselves, which means you can specify multiple columns
+that your dplyr function will apply to.**
+
+Ordinarily, if we want to summarise a single column, such as species, by
+calculating the number of distinct entries (using n_distinct()) it
+contains, we would typically write
+
+```{r}
+penguins %>%
+  summarise(distinct_species = n_distinct(species))
+```
+
+If we wanted to calculate n_distinct() not only across species, but also
+across island and sex, we would need to write out the n_distinct
+function three separate times:
+
+```{r}
+penguins %>%
+  summarise(distinct_species = n_distinct(species),
+            distinct_island = n_distinct(island),
+            distinct_sex = n_distinct(sex))
+```
+
+Wouldn't it be nice if we could just write which columns we want to
+apply n_distinct() to, and then specify n_distinct() once, rather than
+having to apply n_distinct to each column separately?
+
+This is where across() comes in. It is used inside your favourite dplyr
+function and the syntax is across(.cols, .fnd), where .cols specifies
+the columns that you want the dplyr function to act on. When dplyr
+functions involve external functions that you're applying to columns
+e.g. n_distinct() in the example above, this external function is placed
+in the .fnd argument. For example, we would to apply n_distinct() to
+species, island, and sex, we would write across(c(species, island, sex),
+n_distinct) in the summarise parentheses.
+
+Note that we are specifying which variables we want to involve in the
+summarise using c(), as if we're listing the variable names in a vector,
+but because we're in dplyr-land, we don't need to put them in quotes:
+
+```{r}
+penguins %>% 
+  summarize(across(c(species, island, sex), n_distinct))
+```
+
+Something else that's really neat is that you can also use !c() to
+negate a set of variables (i.e. to apply the function to all variables
+except those that you specified in c()):
+
+```{r}
+penguins %>%
+  summarise(across(!c(species, island, sex), 
+                   n_distinct))
+```
+
+I want to emphasize here that the function n_distinct() is an argument
+of across(), rather than being an argument of the dplyr function
+(summarise).
+
+Select helpers: selecting columns to apply the function to So far we've
+seen how to apply a dplyr function to a set of columns using a vector
+notation c(col1, col2, col3, ...). However, there are many other ways to
+specify the columns that you want to apply the dplyr function to.
+
+-   everything(): apply the function to all of the columns
+
+```{r}
+penguins %>% 
+  summarize(across(everything(), n_distinct))
+```
+
+-   starts_with(): apply the function to all columns whose name starts
+    with a specific string
+
+```{r}
+penguins %>% 
+  summarize(across(starts_with("bill"), n_distinct))
+```
+
+-   contains(): apply the function to all columns whose name contains a
+    specific string
+
+```{r}
+penguins %>% 
+  summarize(across(contains("length"), n_distinct))
+```
+
+-   where() apply the function to all columns that satisfy a logical
+    condition, such as is.numeric()
+
+```{r}
+penguins %>% 
+  summarise(across(where(is.numeric), n_distinct))
+```
+
+The full list of select helpers can be found
+[here](https://dplyr.tidyverse.org/reference/select.html).
+
+#### dplyr::across III
+
+ref 1:
+<https://towardsdatascience.com/ten-awesome-recent-developments-in-r-6bfad46299a0>
+
+ref 2:
+<https://towardsdatascience.com/what-you-need-to-know-about-the-new-dplyr-1-0-0-7eaaaf6d78ac>
+
+Expanded powers of abstraction in dplyr dplyr is a package of massive
+significance in the R ecosystem, and as of the release of version 1.0.0
+last year, its power has substantially grown. In particular, many
+commonly loved functions have been abstracted to work across multiple
+columns at once, saving a lot of coding effort. In combination with
+tidyselect which allows you to select columns programatically, code can
+be massively shortened now using functions like across inside summarise.
+For example, where previously we may have written:
+
+```{r}
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarize(mean_disp = mean(disp), 
+            sd_disp = sd(disp), 
+            mean_drat = mean(drat), 
+            sd_drat = sd(drat))
+```
+
+we can now simply write
+
+```{r}
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarize(across(starts_with("d"), list(mean = mean, sd = sd)))
+```
+
+##### Using in-line functions with across
+
+Let's look at an example of summarizing the columns using a custom
+function (rather than n_distinct()). I usually do this using the
+tilde-dot shorthand for inline functions. The notation works by
+replacing
+
+```{r}
+function(x) {
+  x + 10
+}
+```
+
+with
+
+```{r}
+~{.x + 10}
+```
+
+\~ indicates that you have started an anonymous function, and the
+argument of the anonymous function can be referred to using .x (or
+simply .). Unlike normal function arguments that can be anything that
+you like, the tilde-dot function argument is always .x.
+
+For instance, to identify how many missing values there are in every
+column, we could specify the inline function \~sum(is.na(.)), which
+calculates how many NA values are in each column (where the column is
+represented by .) and adds them up:
+
+```{r}
+penguins %>% 
+  summarize(across(everything(), ~(sum(is.na(.)))))
+```
+
+This shows that there are missing values in every column except for the
+first two (species and island).
+
+A mutate example What if we want to replace the missing values in the
+numeric columns with 0 (clearly a terrible choice)? Without the across()
+function, we would apply an if_else() function separately to each
+numeric column, which will replace all NA values with 0 and leave all
+non-NA values as they are:
+
+```{r}
+replace0 <- function(x){
+  if_else(condition = is.na(x), 
+          true = 0, 
+          false = as.numeric(x))
+}
+
+penguins %>% 
+  mutate(bill_length_mm = replace0(bill_length_mm), 
+         bill_depth_mm = replace0(bill_depth_mm),
+         flipper_length_mm = replace0(flipper_length_mm),
+         body_mass_g = replace0(body_mass_g))
+```
+
+But fortunately, we can do this a lot more efficiently with accross().
+
+```{r}
+# define a function to replace NA with 0
+
+penguins %>%
+  mutate(across(where(is.numeric), replace0))
+```
+
+Although obviously 0 isn't a great choice, so perhaps we can replace the
+missing values with the mean value of the column. This time, rather than
+define a new function (in place of replace0), we'll be a bit more
+concise and use the tilde-dot notation to specify the function we want
+to apply.
+
+```{r}
+penguins %>% 
+  mutate(across(where(is.numeric), ~if_else(is.na(.), mean(., na.rm = T), as.numeric(.))))
+```
+
+Or better yet, perhaps we can replace the missing values with the
+average value within the relevant species and island.
+
+```{r}
+penguins %>%
+  group_by(species, island) %>%
+  mutate(across(where(is.numeric), 
+                ~if_else(condition = is.na(.), 
+                         true = mean(., na.rm = T), 
+                         false = as.numeric(.)))) %>%
+  ungroup()
+```
+
+A select example When you're using select, you don't have to include the
+across() function, because the select helpers have always worked with
+select(). This means that you can just write
+
+```{r}
+penguins %>% 
+  select(where(is.numeric))
+```
+
+rather than
+
+```{r}
+penguins %>%
+  select(across(where(is.numeric)))
+```
+
+which will throw an error.
+
+Hopefully across() will make your life easier, as it has mine!
+
+#### dplyr:: with_groups
+
+If you use {dplyr}
+![Package](https://abs-0.twimg.com/emoji/v2/svg/1f4e6.svg "Package"),
+you may wish to avoid the {group_by} + {ungroup} workflow for grouped
+analysis if you just need to carry out a single operation.
+
+The {with_groups} function provides an alternative for such contexts
+![Scissors](https://abs-0.twimg.com/emoji/v2/svg/2702.svg "Scissors")
+
+<https://dplyr.tidyverse.org/reference/with_groups.html>
+
+```{r}
+library(dplyr)
+# example dataframe
+df <- tibble(x = rep(c("a", "b"), 2), y = runif(4))
+
+# without with_groups()
+
+df %>% 
+  group_by(x) %>% 
+  mutate(mean = mean(y)) %>% 
+  ungroup()
+
+# with_groups() same result
+df %>% 
+  with_groups(x, ~mutate(.x, mean = mean(y)))
+
+```
+#### dplyr::rename_with
+
+Want to change multiple column names of your data frame using a vector? {dplyr}'s rename_with() is everything() 
+https://twitter.com/ivelasq3/status/1426538010225561607/photo/1
+
+```{r}
+library(dplyr)
+data <- tribble(~old_a, ~old_b, ~old_c, 
+                "1", "2", "3", 
+                "x", "y", "z")
+cols_new <- c("new_a", "new_b", "new_c")
+
+data %>% 
+  rename_with(~cols_new, everything())
+```
+
+#### Arraging column aphatically in dataset
+
+Have a dataset(ds) with many columns, but want to sort the cols
+alphabetically? E.g. maybe we want to understand what the field contains
+against a glossary/dictionary. We may use dplyr::select() together with
+sort(colnames()) to get a ds with alphabetically sorted cols. \#rstats
+
+```{r}
+iris %>% 
+  select(sort(colnames(.)))
+
+# This also works
+iris %>% 
+  select(sort(names(.)))
+```
+
+#### ftExtra flextable extension
+
+<https://ftextra.atusy.net/>
+
+```{r}
+# remotes::install_github("atusy/ftExtra")
+library(ftExtra)
+library(flextable)
+```
+
+Parse markdown texts
+
+```{r}
+data.frame(
+  x = c("**bold**", "*italic*"),
+  y = c("^superscript^", "~subscript~"),
+  z = c("***~ft~^Extra^** is*", "*Cool*"),
+  stringsAsFactors = FALSE
+) %>%
+  as_flextable() %>%
+  colformat_md()
+```
+
+Span headers
+
+```{r}
+iris %>%
+  head %>%
+  as_flextable() %>%
+  span_header()
+```
+
+Group rows
+
+```{r}
+library(dplyr, warn.conflicts = FALSE)
+iris %>%
+  group_by(Species) %>%
+  slice(1:2) %>%
+  as_flextable()
+```
+
+help(package = "flextable") help(package = )
+
+### dplyr 1.0.4 two new functions if_all() and if_any(), and improved performance improvements of across().
+
+[blog link]
+(<https://www.tidyverse.org/blog/2021/02/dplyr-1-0-4-if-any/>)
+
+across() is very useful within summarise() and mutate(), but it's hard
+to use it with filter() because it is not clear how the results would be
+combined into one logical vector. So to fill the gap, we're introducing
+two new functions if_all() and if_any(). Let's directly dive in to an
+example:
+
+```{r}
+library(dplyr, warn.conflicts = FALSE)
+library(palmerpenguins)
+big <- function(x){
+  x > mean(x, na.rm = TRUE)
+}
+# keep rows if all the selected columns are "big"
+penguins %>% 
+  filter(if_all(contains("bill"), big))
+```
+
+```{r}
+# keep rows where at least one of the columns is "big"
+penguins %>% 
+  filter(if_any(contains("bill"), big))
+```
+
+Both functions operate similarly to across() but go the extra mile of
+aggregating the results to indicate if all the results are true when
+using if_all(), or if at least one is true when using if_any().
+
+Although if_all() and if_any() were designed with filter() in mind, we
+then discovered that they can also be useful within mutate() and/or
+summarise():
+
+```{r}
+penguins %>% 
+  filter(!is.na(bill_length_mm)) %>% 
+  mutate(
+    category = case_when(
+      if_all(contains("bill"), big) ~ "both big", 
+      if_any(contains("bill"), big) ~ "one big", 
+      TRUE                          ~ "small"
+    )) %>% 
+  count(category)
+
+```
+
+### dplyr 1.0.0: new summarise() features
+
+[dplyr 1.0.0 is coming soon, check out new features and related
+vignette](https://www.tidyverse.org/blog/2020/03/dplyr-1-0-0-is-coming-soon/)
+
+```{r}
+# devtools::install_github("tidyverse/dplyr")
+library(dplyr)
+```
+
+Note that the development version won't become 1.0.0 until it's
+released, but it has all the same features.
+
+```{r}
+library(dplyr)
+packageVersion("dplyr")
+```
+
+Multiple rows and columns Two big changes make summarise() much more
+flexible. A single summary expression can now return:
+
+A vector of any length, creating multiple rows. A data frame, creating
+multiple columns. To get a sense for what this means, take this toy
+dataset:
+
+```{r}
+df <- tibble(
+  grp = rep(1:2, each = 5), 
+  x = c(rnorm(5, -0.25, 1), rnorm(5, 0, 1.5)),
+  y = c(rnorm(5, 0.25, 1), rnorm(5, 0, 0.5)),
+)
+df
+```
+
+You can now use summaries that return multiple values:
+
+```{r}
+df %>% 
+  group_by(grp) %>% 
+  summarize(rng = range(x))
+```
+
+Or return multiple columns from a single summary expression:
+
+```{r}
+df %>% 
+  group_by(grp) %>% 
+  summarise(tibble(min = min(x), mean = mean(x)))
+```
+
+(This isn't very useful when used directly, but as you'll see shortly,
+it's really useful inside of functions.)
+
+To put this another way, before dplyr 1.0.0, each summary had to be a
+single value (one row, one column), but now we've lifted that
+restriction so each summary can generate a rectangle of arbitrary size.
+This is a big change to summarise() but it should have minimal impact on
+existing code because it broadens the interface: all existing code will
+continue to work, and a number of inputs that would have previously
+errored now work.
+
+Quantiles To demonstrate this new flexibility in a more useful
+situation, let's take a look at quantile(). quantile() was hard to use
+previously because it returns multiple values. Now it's straightforward:
+
+```{r}
+df %>% 
+  group_by(grp) %>% 
+  summarise(x = quantile(x, c(0.25, 0.5, 0.75)), q = c(0.25, 0.5, 0.75))
+```
+
+It would be nice to be able to reduce the duplication in this code so
+that we don't have to type the quantile values twice. We can now write a
+simple function because summary expressions can now be data frames or
+tibbles:
+
+```{r}
+quibble <- function(x, q = c(0.25, 0.5, 0.75)) {
+  tibble(x = quantile(x, q), q = q)
+}
+df %>% 
+  group_by(grp) %>% 
+  summarise(quibble(x, c(0.25, 0.5, 0.75)))
+```
+
+In the past, one of the challenges of writing this sort of function was
+naming the columns. For example, when you call quibble(y) it'd be nice
+if you could get columns y and y_q, rather than x and x_q. Now, thanks
+to the recent combination of glue and tidy evaluation, that's easy to
+implement:
+
+```{r}
+quibble2 <- function(x, q = c(0.25, 0.5, 0.75)) {
+  tibble("{{ x }}" := quantile(x, q), "{{ x }}_q" := q)
+}
+
+df %>% 
+  group_by(grp) %>% 
+  summarise(quibble2(y, c(0.25, 0.5, 0.75)))
+```
+
+One note of caution: naming the output columns in a function like this
+is a surprisingly complex task, we're not yet sure what the best
+approach is. Expect to hear more about this as we continue to think
+about and experiment with it.
+
+Data-frame columns We've been careful not to name the result of
+quibble() in the code above. That's because when we leave the name off,
+the data frame result is automatically unpacked so each column returned
+by quibble() becomes a column in the result. What happens if we name the
+output?
+
+```{r}
+out <- df %>% 
+  group_by(grp) %>% 
+  summarise(y = quibble2(y, c(0.25, 0.75)))
+```
+
+Look carefully at the output - you'll see a \$ in the column names. This
+lets you know that something weird is going on and you have what we call
+a df-column; a column of a data frame that is itself a data frame!
+
+You can see the structure a little better with str():
+
+```{r}
+str(out)
+```
+
+And you can see that y is indeed a data frame by extracting it:
+
+```{r}
+out$y
+```
+
+And of course, you can dig still deeper to get the individual values:
+
+```{r}
+out$y$y
+```
+
+These df-columns are simultaneously esoteric and commonplace. On the one
+hand they are an oddity of data frames that has existed for a long time,
+but has been used in very few places. On the other hand, they are very
+closely related to merged column headers, which, judging by how often
+they're found in spreadsheets, are an incredibly popular tool. Our hope
+is that they are mostly kept under the covers in dplyr 1.0.0, but you
+can still deliberately choose to access them if you're interested.
+
+Non-summaries
+
+In combination with
+[rowwise()](http://dplyr.tidyverse.org/dev/articles/rowwise.html) (more
+on that in a future blog post), summarise() is now sufficiently powerful
+to replace many workflows that previously required a map() or apply()
+function.
+
+For example, to read all the all the .csv files in the current
+directory, you could write:
+
+```{r}
+tibble(path = dir(pattern = "\\.csv$")) %>% 
+  rowwise(path) %>% 
+  summarise(read_csv(path))
+```
+
+I feel deeply ambivalent about this code: it seems rather forced to
+claim that read.csv() computes a summary of a file path, but it's rather
+elegant pattern for reading in many files into a tibble.
+
+Previous approaches There were a couple of previous approach to solving
+the quantile problem illustrated above. One way was to create a
+list-column and then unnest it:
+
+```{r}
+df %>% 
+  group_by(grp) %>% 
+  summarise(y = list(quibble(y, c(0.25, 0.75)))) %>% 
+  tidyr::unnest(y)
+```
+
+Or to use do():
+
+```{r}
+df %>% 
+  group_by(grp) %>% 
+  do(quibble(.$y, c(0.25, 0.75)))
+```
+
+We prefer the new summarise() approach because it's concise, doesn't
+require learning about list-columns and unnesting, and uses a familiar
+syntax.
+
+##### rowwise operations
+
+[rowwise
+operations](https://dplyr.tidyverse.org/dev/articles/rowwise.html)
+
+dplyr, and R in general, are particularly well suited to performing
+operations over columns, and performing operations over rows is much
+harder. In this vignette, you'll learn dplyr's approach centred around
+the row-wise data frame created by rowwise().
+
+There are three common use cases that we discuss in this vignette:
+
+Row-wise aggregates (e.g. compute the mean of x, y, z). Calling a
+function multiple times with varying arguments. Working with
+list-columns. These types of problems are often easily solved with a for
+loop, but it's nice to have a solution that fits naturally into a
+pipeline.
+
+Of course, someone has to write loops. It doesn't have to be you. ---
+Jenny Bryan
+
+```{r}
+library(dplyr, warn.conflicts = FALSE)
+```
+
+Creating Row-wise operations require a special type of grouping where
+each group consists of a single row. You create this with rowwise():
+
+```{r}
+df <- tibble(x = 1:2, y = 3:4, z = 4:5)
+df %>% rowwise()
+```
+
+Like group_by(), rowwise() doesn't really do anything itself; it just
+changes how the other verbs work. For example, compare the results of
+mutate() in the following code:
+
+```{r}
+df %>% mutate(m = mean(c(x, y, z)))
+df %>% rowwise() %>% mutate(m = mean(c(x, y, z)))
+```
+
+If you use mutate() with a regular data frame, it computes the mean of
+x, y, and z across all rows. If you apply it to a row-wise data frame,
+it computes the mean for each row.
+
+You can optionally supply "identifier" variables in your call to
+rowwise(). These variables are preserved when you call summarise(), so
+they behave somewhat similarly to the grouping variables passed to
+group_by():
+
+```{r}
+df <- tibble(name = c("Mara", "Hadley"), x = c(9, 1), y = 3:4, z = 4:5)
+
+df %>% 
+  rowwise() %>% 
+  summarise(m = mean(c(x, y, z)))
+```
+
+```{r}
+df %>% 
+  rowwise(name) %>% 
+  summarise(m = mean(c(x, y, z)))
+```
+
+rowwise() is just a special form of grouping, so if you want to remove
+it from a data frame, just call ungroup().
+
+Per row summary statistics dplyr::summarise() makes it really easy to
+summarise values across rows within one column. When combined with
+rowwise() it also makes it easy to summarise values across columns
+within one row. To see how, we'll start by making a little dataset:
+
+```{r}
+df <- tibble(id = 1:6, w = runif(6), x = runif(6), y = runif(6), z = runif(6)) %>% 
+  mutate(across(everything(), ~ round(.x, 3)))
+df
+```
+
+Let's say we want compute the sum of w, x, y, and z for each row. We
+start by making a rowwise data frame:
+
+```{r}
+rf <- df %>% rowwise(id)
+```
+
+We can then use mutate() to add a new column to each row, or summarise()
+to return just that one summary:
+
+```{r}
+rf %>% mutate(total = sum(c(w, x, y, z)))
+```
+
+```{r}
+rf %>% summarise(total = sum(c(w, x, y, z)))
+```
+
+Of course, if you have a lot of variables, it's going to be tedious to
+type in every variable name. Instead, you can use
+[c_across()](https://dplyr.tidyverse.org/dev/reference/across.html)
+which uses tidy selection syntax so you can to succinctly select many
+variables:
+
+```{r}
+rf %>% mutate(total = sum(c_across(w:z)))
+```
+
+```{r}
+rf %>% mutate(total = sum(c_across(is.numeric)))
+# OR
+rf %>% mutate(total = sum(c_across(w:z)))
+```
+
+You could combine this with col-wise operations (see
+[vignette("colwise")](https://dplyr.tidyverse.org/dev/articles/colwise.html)
+for more details) to compute the proportion of the total for each
+column:
+
+```{r}
+rf %>% 
+  mutate(total = sum(c_across(w:z))) %>% 
+  ungroup() %>% 
+  mutate(across(w:z, ~ . / total))
+```
+
+Row-wise summary functions The rowwise() approach will work for any
+summary function. But if you need greater speed, it's worth looking for
+a built-in row-wise variant of your summary function. These are more
+efficient because they operate on the data frame as whole; they don't
+split it into rows, compute the summary, and then join the results back
+together again.
+
+```{r}
+df %>% mutate(total = rowSums(across(is.numeric)))
+df %>% mutate(mean = rowMeans(across(is.numeric)))
+```
+
+```{r}
+df %>% mutate(mean = rowMeans(across(is.numeric)))
+```
+
+NB: I use df (not rf) and across() (not c_across()) here because
+rowMeans() and rowSums() take a multi-row data frame as input.
+
+[dplyr 1.0.0: working within
+rows](https://www.tidyverse.org/blog/2020/04/dplyr-1-0-0-rowwise/)
+
+This post is the latest in a series of post leading up the the dplyr
+1.0.0 release. So far, the series has covered:
+
+-   Major lifecycle changes.
+-   New summarise() features.
+-   select(), rename(), relocate().
+-   Working across() columns.
+
+Today, I wanted to talk a little bit about the renewed rowwise()
+function that makes it easy to perform operations "row-by-row". I'll
+show how you can use rowwise() to compute summaries "by row", talk about
+how rowwise() is a natural pairing with list-columns, and show a couple
+of use cases that I think are particularly elegant. You can learn more
+about all of these topics in vignette("rowwise").
+
+Getting the dev version If you're interested in living life on the edge
+(or trying out anything you see in this blog post), you can install the
+development version of dplyr with:
+
+```{r}
+# devtools::install_github("tidyverse/dplyr")
+```
+
+Note that the development version won't become 1.0.0 until it's
+released, but it has all the same features.
+
+```{r}
+library(dplyr, warn.conflicts = FALSE)
+
+```
+
+Basic operation rowwise() works like group_by() in the sense that it
+doesn't change what the data looks like; it changes how dplyr verbs
+operate on the data. Let's see how this works with a simple example.
+Here I have some imaginary test results for students in a class:
+
+```{r}
+df <- tibble(
+  student_id = 1:4, 
+  test1 = 10:13, 
+  test2 = 20:23, 
+  test3 = 30:33, 
+  test4 = 40:43
+)
+```
+
+I'd like to be able to compute the mean of the test scores for each
+student, but mutate() and mean() don't do what I want:
+
+```{r}
+df %>% mutate(avg = mean(c(test1, test2, test3, test4)))
+```
+
+The problem is that I'm getting a mean over the whole data frame, not
+for each student. I can resolve this problem of getting a mean for each
+student by creating a "row-wise" data frame with rowwise():
+
+```{r}
+rf <- rowwise(df, student_id)
+```
+
+rowwise() doesn't need any additional arguments unless you have
+variables that identify the rows, like student_id here. Much like
+grouping variables, identifier variables will be automatically preserved
+when you summarise() the data.
+
+```{r}
+rf
+```
+
+rf looks very similar to df, but behaves very differently:
+
+```{r}
+rf %>% mutate(avg = mean(c(test1, test2, test3, test4)))
+```
+
+An additional advantage of rowwise() is that it's paired with
+c_across(), which works like c() but uses the same tidyselect syntax as
+across(). That makes it easy to operate on multiple variables:
+
+```{r}
+rf %>% mutate(avg = mean(c_across(starts_with("test"))))
+```
+
+Other ways of achieving the same result Some summary functions have
+alternative ways of computing row-wise summaries that take advantage of
+built-in vectorisation. For example, if you wanted to compute the sum,
+you could use +:
+
+```{r}
+df %>% mutate(total = test1 + test2 + test3 + test4)
+```
+
+And you could use the same basic idea to compute the mean:
+
+```{r}
+df %>% mutate(avg = (test1 + test2 + test3 + test4) / 4)
+```
+
+Another family of summary functions have "parallel" extensions where you
+can provide multiple variables in the arguments:
+
+```{r}
+df %>% mutate(
+  min = pmin(test1, test2, test3, test4), 
+  max = pmax(test1, test2, test3, test4), 
+  string = paste(test1, test2, test3, test4, sep = "-")
+)
+```
+
+**Where these functions exist, they'll usually be faster than rowwise().
+The advantage of rowwise() is that it works with any function, not just
+those that are already vectorised.**
+
+List-columns rowwise() is useful for computing simple summaries, but its
+real power comes when you use it with list-columns. Because lists can
+contain anything, you can use list-columns to keep related objects
+together, regardless of what type of thing they are. List-columns give
+you a convenient storage mechanism and rowwise() gives you a convenient
+computation mechanism.
+
+Let's make those ideas concrete by creating a data frame with a
+list-column. A little later, we'll come back to how you might actually
+get a list-column in a more realistic situation. The following data
+frame uses list columns to store things that would otherwise be
+challenging:
+
+-   x contains vectors of different lengths.
+-   y contains vectors of different types
+-   z contains functions, which can't usually live in a data frame.
+
+```{r}
+df <- tibble(
+  x = list(1, 2:3, 4:6),
+  y = list(TRUE, 1, "a"),
+  z = list(sum, mean, sd)
+)
+df
+```
+
+When you have list-columns in a row-wise data frame, you can easily
+compute with each element of the list:
+
+```{r}
+df %>% 
+  rowwise() %>% 
+  summarise(
+    x_length = length(x),
+    y_type = typeof(y),
+    z_call = z(1:5)
+  )
+```
+
+**This makes a row-wise mutate() or summarise() a general vectorisation
+tool, in the same way as the apply family in base R or the map family in
+purrr do. It's now much simpler to solve a number of problems where we
+previously recommended learning about map(), map2(), pmap() and
+friends.**
+
+Use cases
+
+To finish up, I wanted to show off a couple of use cases where I think
+rowwise() provides a really elegant solution: simulations and modelling.
+
+Simulation The basic idea of using rowwise() to perform simulation is to
+store all your simulation paramters in a data frame:
+
+```{r}
+df <- tribble(
+  ~id, ~ n, ~ min, ~ max,
+    1,   3,     0,     1,
+    2,   2,    10,   100,
+    3,   2,   100,  1000,
+)
+```
+
+```{r}
+df %>%
+  rowwise(id) %>%
+  mutate(data = list(runif(n, min, max)))
+```
+
+Or take advantage of summarise()'s new capabilities and return one
+element per row:
+
+```{r}
+df %>%
+  rowwise(id) %>%
+  summarise(x = runif(n, min, max))
+```
+
+Note that id is preserved in the output here because we defined it as an
+identifier variable in the call to rowwise().
+
+vignette("rowwise") expands on this idea to show how you can generate
+parameter grids and vary the random distribution used in each row.
+
+Group-wise models The new nest_by() function works similarly to
+group_by() but instead of storing the grouping data as metadata, visibly
+changes the structure. Now we have three rows (one for each group), and
+we have a list-col, data, that stores the data for that group. Also note
+that the output is a rowwise() object; this is important because it's
+going to make working with that list of data frames much easier.
+
+```{r}
+by_cyl <- mtcars %>% nest_by(cyl)
+by_cyl
+```
+
+Now we can use mutate() to fit a model to each data frame:
+
+```{r}
+by_cyl <- by_cyl %>% mutate(model = list(lm(mpg ~ wt, data = data)))
+by_cyl
+```
+
+(Note that we need to wrap the output of lm() into a list; if you forget
+this, the error message will remind you.)
+
+And then extract model summaries or coefficients with summarise() and
+broom functions:
+
+```{r}
+by_cyl %>% summarise(broom::glance(model))
+```
+
+```{r}
+by_cyl %>% summarise(broom::tidy(model))
+```
+
+#### across
+
+[What you need to know about dplyr 1.0.0 -- Part 1: The across()
+adverb](https://drkeithmcnulty.com/2020/04/06/what-you-need-to-know-about-dplyr-1-0-0-part-1/)
+
+What is across()? Possibly one of the most common uses of dplyr
+functions is group_by() and summarise(). Many beginners to the language
+learn this on their very first day, and it keeps on giving even to more
+advanced programmers. It's a rare day when I don't group and summarise
+something.
+
+Grouping and summarising across multiple variables/columns has
+previously been possible using a limited set of scoped variants of
+summarise(), such as summarise_if() and summarise_at(). However, there
+was clearly some space here to make this more powerful through create a
+unifying function which could:
+
+1.  Summarise across an arbitrary set of columns, defined manually or
+    through a condition
+2.  Simultaneously summarise an arbitrary set of functions on those
+    columns.
+
+So, in short, the new function across() operates across mutiple columns
+and multiple functions within existing dplyr verbs such as summarise()
+or mutate(). This makes it extremely powerful and time-saving. There is
+now no longer any need for the scoped variants.
+
+Examples of across() in use First, you can replicate summarise_at() by
+manually defining a set of columns to summarise using a character vector
+of column names, or by using column numbers:
+
+```{r}
+library(dplyr)
+
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(across(c("mpg", "hp"), mean))
+```
+
+You can replicate mutate_if() by using a function to select your
+columns. Here we turn the name and status columns in the dplyr::storms
+dataset from character to factor.
+
+```{r}
+storms %>% 
+  dplyr::mutate(across(is.character, as.factor)) %>% 
+  dplyr::select(name, status)
+```
+
+You can also apply multiple named functions to your multiple columns by
+using a list. The across() function will by default glue your function
+and column names together with an underscore:
+
+```{r}
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(across(c("mpg", "hp"), list(mean = mean, median = median, sd = sd)))
+```
+
+And if you want to use a different glueing formula, you can do so using
+glue syntax:
+
+```{r}
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(across(c("mpg", "hp"), 
+                   list(mean = mean, median = median, sd = sd), 
+                   .names = "{col}_{fn}_summ")) 
+```
+
+If you need to add optional arguments into your functions, you can use
+formulas:
+
+```{r}
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(across(c("mpg", "hp"), 
+                   list(mean = ~mean(.x, na.rm = T), 
+                        median = ~median(.x, na.rm = T), 
+                        sd = ~sd(.x, na.rm = T)), 
+                   .names = "{col}_{fn}_summ")) 
+```
+
+And similarly you can use formulas to combine functions to avoid
+unnecessary extra mutating:
+
+```{r}
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(across(mpg, 
+                   list(minus_sd = ~(mean(.x) - sd(.x)), 
+                        mean = mean, 
+                        plus_sd = ~(mean(.x) + sd(.x)))
+                   )) 
+```
+
+Extra tip: c_across() for working row-wise Similarly c_across() allows
+you to mutate based on an arbitrary set of columns. Here are a couple of
+examples:
+
+```{r}
+WorldPhones %>% 
+  as.data.frame() %>% 
+  rowwise() %>% 
+  mutate(mean = mean(c_across(N.Amer:Mid.Amer), na.rm = TRUE))
+```
+
+```{r}
+starwars %>% 
+  rowwise() %>% 
+  mutate(
+    stuff_they_own = length(c_across(c("vehicles", "starships")))
+  ) %>% 
+  select(name, stuff_they_own) 
+```
+
+#### flex summarise()
+
+[What you need to know about dplyr 1.0.0 -- Part 2 more flexible
+summarise()](https://drkeithmcnulty.com/2020/04/08/what-you-need-to-know-about-dplyr-1-0-0-part-2-more-flexible-summarise/)
+
+ummarise -- the original workhorse of dplyr -- has been made even more
+flexible in the new release. **First, it can now return vectors to form
+multiple rows in the output.** **Second, it can return dataframes to
+form multiple rows and columns in the output.** This might be a little
+mind-bending for some, so I'll spend a little time on it here to
+illustrate how this could work.
+
+Vector output If you want to summarise a function that creates a vector
+output, this is now easy. For example you can easily summarise a range:
+
+```{r}
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(range = range(mpg))
+```
+
+#### Seven Key Things dplyr 1.0.0
+
+[The Seven Key Things You Need To Know About dplyr
+1.0.0](https://towardsdatascience.com/what-you-need-to-know-about-the-new-dplyr-1-0-0-7eaaaf6d78ac)
+
+#### 1. Built in tidyselect
+
+You can now use tidyselect helper functions inside certain dplyr verbs.
+For example:
+
+```{r}
+library(dplyr)
+mtcars %>% 
+  select(starts_with("c")) %>% 
+  head(3)
+```
+
+```{r}
+mtcars %>% 
+  select(any_of(c("mpg", "cyl", "trash"))) %>% 
+  head(3)
+```
+
+tidyselect helper functions like this work inside any selecting
+function, including some new ones that we will look at later. You can
+find the full range of tidyselect functions
+[here](https://tidyselect.r-lib.org/reference/select_helpers.html)
+
+#### 2. Simple but so useful --- the relocate() function
+
+Often people want a specific order to the columns in their dataframe,
+and previously the only way to do that was to order the columns within a
+select() verb, and that was tedious if there was a lot of columns
+involved. By default relocate will move your column or columns to the
+left of the dataframe. If you want to move them to a specific place, you
+can use the .before or .after arguments. For example:
+
+```{r}
+mtcars %>% 
+  dplyr::relocate(disp) %>% 
+  head(3)
+```
+
+```{r}
+mtcars %>% 
+  relocate(starts_with("c"), .after = disp)  %>% 
+  head(3)
+```
+
+#### 3.expanded summarise() function
+
+Summarise --- the original workhorse of dplyr -- has been made even more
+flexible in this new release. First, it can now return vectors to form
+multiple rows in the output. Second, it can return dataframes to form
+multiple rows and columns in the output. This might be a little
+mind-bending for some, so I'll spend a little time on it here to
+illustrate how this could work. If you want to summarise a function that
+creates a vector output, this is now easy. For example you can easily
+summarise a range:
+
+```{r}
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(range = range(mpg))
+```
+
+You could then combine with tidyr::pivot_wider() if you wish:
+
+```{r}
+library(tidyr)
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(range = range(mpg)) %>% 
+  mutate(name = rep(c("min", "max"), length(unique(cyl)))) %>% 
+  pivot_wider(names_from = name, values_from = range)
+```
+
+This would provide the equivalent of:
+
+```{r}
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(min = min(mpg), max = max(mpg))
+```
+
+The second option in this case is much easier, but where this comes in
+useful is where you have longer outputs. Here's one simple way you could
+compute deciles:
+
+```{r}
+decile <- seq(0, 1, 0.1)
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(deciles = quantile(mpg, decile)) %>% 
+  mutate(name = rep(paste0("dec_", decile), length(unique(cyl)))) %>% 
+  pivot_wider(names_from = name, values_from = deciles)
+```
+
+Now your summarise output can be a dataframe. Let's look at a simple
+example. Recently I wrote a function that identified all unique
+unordered pairs of elements in a vector. Now I want to apply that to map
+a network of connections between characters of Friends based on
+appearing in the same scene. Here's a simple version of a dataframe I
+might be working from:
+
+```{r}
+friends_episode <- data.frame(
+  scene = c(1, 1, 1, 2, 2, 2),
+  character = c("Joey", "Phoebe", "Chandler", "Joey", "Chandler", "Janice")
+)
+friends_episode
+```
+
+Now I'm going to write my function which accepts a vector and which
+produces a two column dataframe, and apply it by scene:
+
+```{r}
+unique_pairs <- function(char_vector = NULL) {
+  vector <- as.character(unique(char_vector))
+  df <- data.frame(from = character(), to = character(), stringsAsFactors = FALSE)
+  if (length(vector) > 1) {
+    for (i in 1:(length(vector) - 1)) {
+      from <- rep(vector[i], length(vector) - i) 
+      to <- vector[(i + 1): length(vector)]
+      df <- df %>% 
+        dplyr::bind_rows(
+          data.frame(from = from, to = to, stringsAsFactors = FALSE) 
+        )
+    }
+  }
+  df
+}
+friends_episode %>% 
+  group_by(scene) %>% 
+  summarise(unique_pairs(character))
+```
+
+As you might see, the dataframe which is the output of my summarise()
+function has been unpacked and forms two columns in the final output.
+What happens if we name the output of our summarise() function?
+
+```{r}
+friends_pairs <- friends_episode %>% 
+  group_by(scene) %>% 
+  summarise(pairs = unique_pairs(character))
+friends_pairs
+```
+
+So this is an important watchout. If you want your summarise() output
+unpacked, don't name it.
+
+#### 4.colwise wrangling with across()
+
+With these more powerful summarise capabilities, and with the in-built
+tidyselect toolkit, this sets us up for much more powerful and
+abstracted capabilities to work with the columns of our data and form a
+wider range of tasks. The introduction of the new across() adverb
+enables this. In short, the new function across() operates across
+multiple columns and multiple functions within existing dplyr verbs such
+as summarise() or mutate(). This makes it extremely powerful and
+time-saving. There is now no longer any need for the scoped variants
+such as summarise_at(), mutate_if(), etc. First, you can replicate
+summarise_at() by manually defining a set of columns to summarise using
+a character vector of column names, or by using column numbers:
+
+```{r}
+library(dplyr)
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(across(c("mpg", "hp"), mean))
+```
+
+across() is a selecting function, and so you can use the tidyselect
+syntax inside it. You can replicate mutate_if() by using a function to
+select your columns. Here we turn the name and status columns in the
+dplyr::storms dataset from character to factor.
+
+```{r}
+storms %>% 
+  dplyr::mutate(across(is.character, as.factor)) %>% 
+  dplyr::select(name, status)
+```
+
+You can also apply multiple named functions to your multiple columns by
+using a list. The across() function will by default glue your function
+and column names together with an underscore:
+
+```{r}
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(across(c("mpg", "hp"), list(mean = mean, median = median, sd = sd)))
+```
+
+And if you want to use a different glueing formula, you can do so using
+glue syntax:
+
+```{r}
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(across(starts_with("d"), 
+                   list(mean = mean, sd = sd), 
+                   .names = "{col}_{fn}_summ"))
+```
+
+If you need to add optional arguments into your functions, you can use
+formulas:
+
+```{r}
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(across(c("mpg", "hp"), 
+                   list(mean = ~mean(.x, na.rm = T), 
+                        median = ~median(.x, na.rm = T), 
+                        sd = ~sd(.x, na.rm = T)), 
+                   .names = "{col}_{fn}_summ"))
+```
+
+And similarly you can use formulas to combine functions to avoid
+unnecessary extra mutating:
+
+```{r}
+mtcars %>% 
+  group_by (cyl) %>%  
+  summarise(across(mpg, 
+                   list(minus_sd = ~(mean(.x) - sd(.x)), 
+                        mean = mean, 
+                        plus_sd = ~(mean(.x) + sd(.x)))
+                   ))
+```
+
+#### 5.rowwise() comes to life in the new dplyr
+
+dplyr previously had limited friendliness to working across rows. It
+previously behaved somewhat counter-intuitively when you wanted to sum
+or average across values in the same row. Here's an example, which some
+of you might recognize as being a source of a previous headache:
+
+```{r}
+WorldPhones_df <- WorldPhones %>% 
+  as.data.frame() 
+# mutate an average column
+WorldPhones_df %>% 
+  dplyr::mutate(avg = mean(N.Amer:Mid.Amer))
+```
+
+This has returned the average of everything in every column in your
+dataframe, which is of course not what was intended. Previously the only
+solution to this was to use manual calculations and to avoid using
+functions in this way, so you would write (N.Amer + Europe + Asia +
+S.Amer + Oceania + Africa + Mid.Amer)/7 which was pretty darn tedious.
+rowwise() creates a different structure called a rowwise_df which
+prepares your data to perform operations across the rows -- it basically
+groups your data by row.
+
+**rowwise() is super-powered by the new c_across() adverb to allow you
+to work in a similar way to how you would work colwise with the across()
+adverb. Now you can write:**
+
+```{r}
+WorldPhones_df %>% 
+  rowwise() %>% 
+  dplyr::mutate(avg = mean(c_across(N.Amer:Mid.Amer)))
+```
+
+#### 6. Modeling inside your dataframe
+
+The new rowwise_df object is designed to work with list-columns, which
+allow the storage of any type of data you want inside a column in a
+dataframe. Where I find this particularly valuable is where you want to
+run different models on subsets of your data according to the value of
+certain variables. Here's an example of how you can store different
+subsets of mtcars in a rowwise dataframe and then run a model on them.
+
+```{r}
+model_coefs <- function(formula, data) {
+  coefs <- lm(formula, data)$coefficients
+  data.frame(coef = names(coefs), value = coefs)
+}
+mtcars %>% 
+  dplyr::group_by(cyl) %>% 
+  tidyr::nest() %>% 
+  dplyr::rowwise() %>% 
+  dplyr::summarise(model_coefs(mpg ~ wt + disp + hp, data = data)) %>% 
+  tidyr::pivot_wider(names_from = coef, values_from = value)
+```
+
+#### 7. The nest_by() function
+
+Of course, the developers behind dplyr 1.0.0 noticed the power of this
+row-wise modelling capability and so created the nest_by() function as a
+shortcut for the code above. nest_by(x) is equivalent of:
+
+```{r}
+dplyr::group_by(x) %>% 
+  tidyr::nest() %>% 
+  dplyr::rowwise()
+```
+
+So now you can do the modeling above using:
+
+```{r}
+mtcars %>% 
+  nest_by(cyl) %>% 
+  dplyr::summarise(model_coefs(mpg ~ wt + disp + hp, data = data)) %>% 
+  tidyr::pivot_wider(names_from = coef, values_from = value)
+```
+
+#### Last mintue addtions
+
+This post is the latest in a series of post leading up the the dplyr
+1.0.0 release on May 15. So far, the series has covered:
+
+-   [Major lifecycle
+    changes.](https://www.tidyverse.org/blog/2020/03/dplyr-1-0-0-is-coming-soon/)
+-   [New summarise()
+    features.](https://www.tidyverse.org/blog/2020/03/dplyr-1-0-0-summarise/)
+-   [select(), rename(), and (new)
+    relocate()](https://www.tidyverse.org/blog/2020/03/dplyr-1-0-0-select-rename-relocate/).
+-   [Working across()
+    columns](https://www.tidyverse.org/blog/2020/04/dplyr-1-0-0-colwise/).
+-   [Working within
+    rows](https://www.tidyverse.org/blog/2020/04/dplyr-1-0-0-rowwise/).
+-   [The role of the vctrs
+    package](https://www.tidyverse.org/blog/2020/04/dplyr-1-0-0-and-vctrs/).
+-   [Notes for package
+    developers](https://www.tidyverse.org/blog/2020/04/dplyr-1-0-0-package-dev/).
+
+Today I wanted to talk about two cool new features that we've added
+since I started blogging about dplyr 1.0.0: summarise() now gives you
+greater control over how the results are grouped, and a new set of
+functions make it easier to modify rows.
+
+Getting the dev version If you'd like to try out anything you see in
+this blog post, you can install the development version of dplyr with:
+
+```{r}
+# devtools::install_github("tidyverse/dplyr")
+library (dplyr)
+```
+
+Note that the development version won't become 1.0.0 until it's
+released, but at this point, it's very similar to what we'll be
+submitting to CRAN on May 15.
+
+```{r}
+library(dplyr, warn.conflicts = FALSE)
+```
+
+##### summarise() and grouping
+
+There's a common confusion about the result of summarise(). How do you
+think the result of the following code will be grouped?
+
+```{r}
+homeworld_species <- starwars %>% 
+  group_by(homeworld, species) %>% 
+  summarise(n = n())
+```
+
+You might be surprised to learn that it's grouped by homeworld:
+
+```{r}
+head(homeworld_species, 3)
+```
+
+That's because summarise() always peels off the last group, based on the
+logic that this group now occupies a single row so there's no point
+grouping by it. This behaviour made perfect sense to me at the time I
+implemented it, but it's been a long standing source of confusion among
+dplyr users (and it doesn't make sense if your summary [returns multiple
+rows](https://www.tidyverse.org/blog/2020/03/dplyr-1-0-0-summarise/)).
+
+Unfortunately, it would be very difficult to change this default now
+because a lot of code probably relies on it. Instead, we're doing the
+next best thing: exposing the default behaviour more explicitly and
+making it easier to change. In dplyr 1.0.0, the code above will display
+a message telling you how the result has been grouped:
+
+```{r}
+homeworld_species <- starwars %>% 
+  group_by(homeworld, species) %>% 
+  summarise(n = n())
+
+# #> `summarise()` regrouping by 'homeworld' (override with `.groups` argument)
+```
+
+The text hints at how to take control of grouping and eliminate the
+message: a new .groups argument allows you to control the grouping of
+the result. It currently has four possible values:
+
+-   .groups = "drop_last" drops the last grouping level (i.e. the
+    default behaviour sans message).
+-   .groups = "drop" drops all grouping levels and returns a tibble.
+-   .groups = "keep" preserves the grouping of the input.
+-   .groups = "r owwise" turns each row into [its own
+    group](https://www.tidyverse.org/blog/2020/04/dplyr-1-0-0-rowwise/).
+
+If you find the default message annoying, you can suppress by setting a
+global option:
+
+options(dplyr.summarise.inform = FALSE) .groups is very new, so we've
+marked it as experimental, meaning that it may change in the future.
+Please let us know what you think of it to help us make a decision about
+its future.
+
+##### Row mutation
+
+Thanks to [Kirill Müller](https://krlmlr.info/), dplyr has a new
+experimental family of row mutation functions inspired by SQL's UPDATE,
+INSERT, UPSERT, and DELETE. Like the join functions, they all work with
+a pair of data frames:
+
+-   rows_update(x, y) updates existing rows in x with values in y.
+-   rows_patch(x, y) works like rows_update() but only changes NA
+    values.
+-   rows_insert(x, y) adds new rows to x from y.
+-   rows_upsert(x, y) updates existing rows in x and adds new rows
+    from y.
+-   rows_delete(x, y) deletes rows in x that match rows in y.
+
+The rows\_ functions match x and y using keys. A key is one or more
+variables that uniquely identifies each row. All rows\_ functions check
+that the keys of x and y are valid (i.e. unique) before doing anything.
+
+Let's see how these work with some toy data:
+
+```{r}
+df <- tibble(a = 1:3, b = letters[c(1:2, NA)], c = 0.5 + 0:2)
+df
+```
+
+We can use rows_insert() to add new rows:
+
+```{r}
+new <- tibble(a = c(4, 5), b = c("d", "e"), c = c(3.5, 4.5))
+```
+
+```{r}
+df %>% dplyr::rows_insert(new)
+```
+
+for more, please find the link
+[here](https://www.tidyverse.org/blog/2020/05/dplyr-1-0-0-last-minute-additions/?utm_content=buffer77157&utm_medium=social&utm_source=linkedin&utm_campaign=buffer)
+
+#### case_when
+
+case when is particularly useful inside mutate when you want to create a
+new variable that relies on a complex combination of existing variables
+
+```{r}
+starwars %>% 
+  select(name:mass, gender, species) %>% 
+  mutate(
+    type = case_when(
+    height >200 | mass > 200 ~ "large", 
+    species == "Droid" ~ "robot", 
+    TRUE               ~ "other" # no condition
+    )
+  )
+```
+
+### List columns
+
+ref 1:
+<https://towardsdatascience.com/ten-awesome-recent-developments-in-r-6bfad46299a0>
+ref 2:
+<https://towardsdatascience.com/generating-parameterized-powerpoint-documents-in-python-and-r-333368479038>
+
+While not brand new, list columns have come into the limelight more
+since last year's major update of tidyverse packages dplyr and tidyr .
+Now columns of dataframes can be lists and not just vectors, which
+allows us the flexibility to put anything in dataframes, including
+models, graphics, other dataframes, whatever. This creates huge
+flexibility and opens up greater power for packages like dplyr. For
+example, you can now nest subset dataframes inside dataframes:
+
+```{r}
+mtcars %>% 
+  nest_by(cyl)
+```
+
+```{r}
+plotframe <- mtcars %>% 
+  nest_by(cyl) %>% 
+  mutate(
+    plot = list(ggplot(data = data, aes(wt, mpg)) +geom_point() + 
+                  geom_smooth()))
+  
+```
+
+Now we have a list column containing dataframes and a list column
+containing plots. To see a specific plot you can just call an element of
+the list column:
+
+```{r}
+plotframe$plot[1]
+```
+
+## na_matches = "never"
+
+Did you know the {dplyr} joins join on NAs by default, and you can
+override it with `na_matches = "never"`?
+<https://stackoverflow.com/questions/46161553/prevent-dplyr-from-joining-on-nas>
+
+```{r}
+x <- data.frame(a = c(5, NA, 9), b = 1:3)
+y <- data.frame(a = c(5, NA, 9), c = 4:6)
+z <- dplyr::inner_join(x, y, by = 'a')
+# if we dont watch matches by NA use this one
+dplyr::inner_join(x, y, by = 'a', na_matches = "never")
+```
+
+I learned this because my 12,000 rows were becoming 4 million.
+
+## Anonymous/Lambda) function (Lambda-like) syntax in R
+
+ref:
+<https://towardsdatascience.com/ten-awesome-recent-developments-in-r-6bfad46299a0>
+
+Another concurrent development in R 4.1.0 is a new syntax for writing
+anonymous functions that are intended for one-off usage, similar to
+Lambdas in Python. In general, R has previously been set up to encourage
+all functions to be named in memory. For example:
+
+```{r}
+check_mazda <- function(x) {
+  grepl("Mazda", x)
+}
+```
+
+and then we would pipe into that function as follows:
+
+```{r}
+mtcars %>% 
+  row.names() %>%  
+  check_mazda()
+```
+
+While there were always ways round this, the most recent release
+formalizes a shorthand for anonymous functions as follows:
+
+```{r}
+mtcars %>% 
+  row.names() %>% 
+  {\(x) grepl("Mazda", x)}()
+```
+
+This sets things nicely for mapping anonymous functions across data
+structures. For example:
+
+```{r}
+mtcars %>% 
+  lapply(\(x) mean(x) > 20)
+```
+
+will test across all columns of mtcars whether the column has a mean
+greater than 20.
+
+## STRINGR_stringr
+
+extracting word from a string
+
+```{r}
+# extract first two words of string
+
+library(stringr)
+
+broke_strings <- c( "Arya born on 12 April, 2012", 
+                    "Vivang born on 27 February, 2015", 
+                   " Jyoti born on 6 November, 1981"
+                   )
+woke_strings <- word(broke_strings, start = 1, end = 4, sep = " " )
+woke_strings
+
+```
+
+# GGPLOT2\|ggplot2
+
+## Colors in ggplot2
+
+### coolor.co
+
+to choose your color hexcode/color palette
+
+<https://coolors.co/palettes/trending>
+
+### paletteer
+
+While deciding to use a color palette, not only do we wish to know the
+hex color codes but also how the color looks
+<https://emilhvitfeldt.github.io/paletteer/reference/paletteer_d.html>
+
+```{r}
+library(paletteer)
+palettes_d_names(paletteer)
+
+
+{r} palettes_d_names
+
+{r} palettes_c_names
+
+paletteer_d("wesanderson::Darjeeling1")
+
+
+paletteer_d("Redmonder::dPBIPuOr", 14, type = "continuous")
+
+paletteer_c("viridis::inferno", n = 5)
+
+paletteer_d("viridis::inferno", 5)
+
+
+paletteer_d("wesanderson::Darjeeling1")
+
+paletteer_d("beyonce::X3")
+
+paletteer_d("nord::frost")
+
+paletteer_d("Redmonder::dPBIPuOr", 14, type = "continuous")
+
+paletteer_c("viridis::inferno", n = 5)
+
+paletteer_d("viridis::inferno", 5)
+
+
+
+paletteer_d("wesanderson::Darjeeling1")
+
+paletteer_d("beyonce::X3")
+
+paletteer_d("nord::frost")
+
+paletteer_d("Redmonder::dPBIPuOr", 14, type = "continuous")
+
+paletteer_c("viridis::inferno", n = 5)
+
+paletteer_d("viridis::inferno", 5)
+```
+
+## Fonts in ggplot 2
+
+### fonts thread from twitter
+
+Sick and tired of the default R fonts? Here's a comprehensive guide to
+using different fonts in ggplot2!
+(<https://twitter.com/moriah_taylor58/status/1409709880533950475>)
+
+STEP 1: Find a font. There are many places to find fonts such as
+<http://fontspace.com> and <http://fonts.google.com> (which is what I
+use). Regardless of where you get your font, make sure you download it
+as a TrueType Font (.ttf) file!
+
+STEP 2: Picking a font. It is best practice to use fonts that are
+legible as well as dyslexic-friendly. You can accomplish this by using
+Sans Serif fonts.
+
+For more information on how to make visualizations and texts more
+dyslexic-friendly, such as what background colors to use or font sizes
+to use, please reference this style guide by the British Dyslexia
+Association: <https://t.co/grXip7myuF?amp=1>
+
+<https://www.bdadyslexia.org.uk/advice/employers/creating-a-dyslexia-friendly-workplace/dyslexia-friendly-style-guide>
+
+STEP 2 a. If you want to use more than one font, I recommend using
+<http://fonts.google.com> because it recommends complementary fonts you
+can use and shows a preview of what they'd look like next to each other.
+
+STEP 3: Using your font in a ggplot. Two prerequisites for this step are
+that (1) you need to have your font saved with your source file as well
+as downloaded into your system fonts and (2) you need to install the
+package {showfont}
+
+STEP 4 Okay, time for some code. The first thing you'll want to do is
+add your fonts using the `font_add()` function. This function takes in
+two arguments: family and file path, here family is the name that you
+assign to that font, and the file path leads to the font.
+
+One way that I tend to name my fonts is by where I'm using them in my
+visual, so I'll name them "title", "subtitle", etc. Here's an example:
+
+![](font_add.jfif)
+
+Right after you add your fonts, run the line \`showtext_auto()\`. This
+is what allows the fonts to show in the ggplot and plot preview.
+
+Now, for implementing these fonts in your ggplot2 visualization. You can
+do this in two ways, depending on whether you make a custom theme before
+plotting or stylize your ggplot in the plot call.
+
+My preferred method is to create a custom theme and assign this to an
+object. I prefer this approach because it doesn't clutter up the plot
+call, allowing for more "tinkering" with plot customizations whilst
+maintaining clean code.
+
+There are lots of parameters that can go into this, and you'll get more
+familiar with them through practice (I still look up doc from time to
+time). Here's an example of a custom theme being stored as an object:
+
+![](theme_update.jfif)
+
+In the theme function, the text is assigned a font in the
+\`element_text()\` call with the argument \`family= \`. Next, you can
+add the theme object to your plot:
+
+The other way to use the theme function is in the plot call. The syntax
+is exactly the same - here is a simple example:
+
+![](theme_function_call.jfif)
+
+Hadley Wickham: I'd also recommend checking out ragg
+(<https://www.tidyverse.org/blog/2021/02/modern-text-features/>) --- it
+works directly with the fonts you already have installed. one response
+on this: This is awesome! But what if I need PDF output? I understand
+ragg doesn't work for that?
+
+## Theme in ggplot2
+
+## Other ggplot2 tips
+
+### rupee symbol in ggplot 2
+
+```{r}
+library(tidyverse)
+library(scales)
+
+label_rupee <- label_dollar(
+  prefix = "₹", 
+  suffix = "",
+  big.mark = ",",
+  decimal.mark = "."
+)
+
+diamonds %>% 
+  ggplot(aes(x = depth, y = price)) +
+  geom_point() + 
+  scale_y_continuous(labels = label_rupee)
+
+```
+
+What you need to know about \#\# ggplot2/Visualization
+
+```{r}
+# Packages and help pages
+helhelp(package = "ggplot2")
+help(package = "ggeasy")
+help(package = "ggpubr")
+
+help(package = "ggrepel")
+help(package = "cowplot")
+aels()
+```
+
+I have got tasks like that in my RStudio code snippets, each startin
+with myg\_ so I can search using autocomplete on my own system, Seems
+slightly faster than searching Google or Stack over fllow
+
+Here's a fun \#rstats design pattern I've become more and more fond of:
+use magrittr's %T\>% tee operator to keep returning the original value
+in the chain of functions so you can do multiple things at once, like
+saving a ggplot in multiple formats
+
+```{r}
+# library(tidyverse)
+library(magrittr)
+
+my_plot <-  ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point()
+
+my_plot %T>%
+  print() %T>%
+  ggsave(filename = "wt-mpg.pdf", plot = ., 
+         width = 5, height = 3, units = "in", device = cairo_pdf) %T>%
+  ggsave(filename = "wt-mpg.png", plot = ., 
+         width = 5, height = 3, units = "in", device = "png", dpi = 300) %T>%
+  ggsave(filename = "wt-mpg.tiff", plot = ., 
+         width = 5, height = 3, units = "in", device = "tiff", dpi = 300)
+```
+
+I just merged support for one of the most frequently requested features
+into the ggplot2 development branch: Plot titles that span the entire
+plot.
+
+```{r}
+library(ggplot2)
+library(forcats)
+ggplot(mpg, aes(x = fct_rev(fct_infreq(class)))) +
+  geom_bar() + 
+  coord_flip() + 
+  labs(
+    title = "So many SUVs", 
+    subtitle = "Number of cars of different classes in the mpg dataset"
+  )  
+  #  +theme(
+  #   axis.title.y = element_blank(),
+  #   plot.title.position = "plot"
+  # )
+```
+
+## ggeasy
+
+```{r}
+ # install.packages("devtools")
+devtools::install_github("jonocarroll/ggeasy")
+```
+
+[ggeasy](https://jonocarroll.github.io/ggeasy/)
+
+```{r}
+library(ggplot2)
+library(ggeasy)
+
+# rotate x axis labels
+ggplot(mtcars, aes(hp, mpg)) +
+    geom_point() +
+    easy_rotate_x_labels()
+```
+
+```{r}
+# rotate y axis labels
+ggplot(mtcars, aes(hp, mpg)) +
+    geom_point() +
+    easy_rotate_y_labels()
+```
+
+```{r}
+# remove 'size' legend
+ggplot(mtcars, aes(wt, mpg, colour = cyl, size = hp)) +
+    geom_point() +
+    easy_remove_legend(size)
+```
+
+```{r}
+# make the x axis labels larger
+ggplot(mtcars, aes(mpg, hp)) +
+  geom_point() +
+  easy_x_axis_labels_size(20)
+```
+
+```{r}
+ # make all the text red
+ggplot(mtcars, aes(mpg, hp)) +
+  geom_point(aes(fill = gear)) +
+  easy_all_text_color("red")
+```
+
+```{r}
+# remove just x axis
+ggplot(mtcars, aes(wt, mpg)) +
+  geom_point() +
+  easy_remove_x_axis()
+```
+
+```{r}
+# remove y axis ticks
+ggplot(mtcars, aes(wt, mpg)) +
+  geom_point() +
+  easy_remove_y_axis(what = "ticks")
+```
+
+```{r}
+# move legends to bottom
+ggplot(mtcars, aes(wt, mpg, colour = cyl, size = hp)) +
+  geom_point() +
+  easy_move_legend("bottom")
+```
+
+```{r}
+# move legend to left side
+ggplot(mtcars, aes(wt, mpg, colour = cyl, size = hp)) +
+  geom_point() +
+  easy_legend_at("left")
+```
+
+```{r}
+# Make legends horizontal
+ggplot(mtcars, aes(wt, mpg, colour = cyl, size = hp)) +
+  geom_point() + easy_rotate_legend("horizontal")
+```
+
+```{r}
+# use labelled variables
+iris_labs <- iris
+labelled::var_label(iris_labs$Species) <- "Flower\nSpecies"
+labelled::var_label(iris_labs$Sepal.Length) <- "Length of Sepal"
+iris_labs_2 <- iris_labs
+labelled::var_label(iris_labs_2$Species) <- "Sub-genera"
+
+# use variable labels automatically
+ggplot(iris_labs, aes(x = Sepal.Length, y = Sepal.Width)) +
+    geom_line(aes(colour = Species)) +
+    geom_point(data = iris_labs_2, aes(fill = Species), shape = 24) +
+    easy_labs()
+```
+
+These functions will try to teach you the âofficialâ way to achieve
+these goal, usually via the teach argument (where implemented)
+
+```{r}
+ggplot(mtcars, aes(hp, mpg)) +
+    geom_point() +
+    easy_rotate_y_labels(angle = "startatbottom", teach = TRUE)
+#> easy_rotate_y_labels call can be substituted with:
+#> theme(axis.text.y = element_text(angle = 90, hjust = 0))
+```
+
+```{r}
+ggplot(mtcars, aes(wt, mpg)) +
+  geom_point() +
+  easy_remove_y_axis(what = "ticks", teach = TRUE)
+#> easy_remove_y_axis call can be substituted with:
+#> theme(axis.ticks.y = element_blank())
+
+```
+
+```{r}
+ggplot(daughters_birthday)+geom_ballons(alpha=0.5) +scale_fill_viridis_d() 
+```
+
+The purpose of this add-in is to let you explore your data quickly to
+extract the information they hold. You can create visualization with
+[{ggplot2}](https://ggplot2.tidyverse.org/), filter data with
+[{dplyr}](https://dplyr.tidyverse.org/) and retrieve generated code.
+
+<https://cran.r-project.org/web/packages/esquisse/readme/README.html>
+
+# Blogdown
+
+## Rmarkdown/Bookdown
+
+### knitr::stitch
+
+Sometimes you just want to quickly convert the source code from R script
+(.R) into a report (can be a markdown, PDF, HTML).
+
+The {stitch} function family from {knitr} Package makes this conversion
+effortless! <https://rdrr.io/cran/knitr/man/stitch.html>
+
+```{r}
+library(knitr)
+# convert R code to a report
+# produces 'code.tex' and 'code.pdf'
+stitch("code.R")
+# produces 'code.md' and 'code.html'
+stitch_rmd("code.R")
+# produceds 'code.html'
+stitch_rhtml("code.R")
+```
+
+## Repreducibility/Workfolow Managment
+
+### usethis::use_blank_slate(scope = c("user", "project"))
+
+```{r}
+usethis::use_blank_slate(scope = "user")
+```
+
+Arguments scope\
+Edit globally for the current user, or locally for the current project
+
+### Here Package
+
+```{r}
+library(here)
+here()
+```
+
+### Notes on the here package --
+
+The here package is pretty simple ( only 3 functions), but I keep
+messing things up when I try to create paths with it, so this is my
+aide-memoire. It might be useful for others too.
+
+Here finds the root of your current folder / working directory. If you
+use Projects in RStudio, that will usually be the root of your project
+folder. (If not, you can use set_here() to create a small file which
+will set the root location).
+
+Then, you can use here() as a variable for the folder root / working
+directory, and any subfolders you create are referenced relative to
+that.
+
+This aids code portability -- If I have code that creates a subfolder in
+my Documents folder, and send that code to someone else, then the code
+won't work because the path doesn't exist on their machine. They'll need
+to revise it to make it work. If you're on a network, filepaths get
+unwieldy pretty quickly.
+
+Here() does away with that -- their root folder becomes here() and any
+subfolders will be created under those.
+
+The bit I always mess up is creating a sub folder, so here we are:
+
+Where am I right now?
+
+```{r}
+here()
+```
+
+```{r}
+# Create a subfolder
+dir.create(here("imgtest"))
+```
+
+```{r}
+# Create another one
+dir.create(here("imgtest","pngtest"))
+```
+
+```{r}
+# Move to the “img” folder using setwd()
+setwd(here("imgtest"))
+```
+
+Now to check this worked -- get the current working directory with
+getwd()
+
+```{r}
+getwd()
+```
+
+Then go back to the root of the project
+
+```{r}
+setwd(here())
+```
+
+```{r}
+# Check you are back where you started:
+getwd()
+```
+
+\#\#usethis \#\#\# `usethis::use_blank_slate()` sets your @rstudio
+preference to NEVER save/restore .RData on exit/startup, which is a
+lifestyle endorsed by many \#rstats folks (including me).
+
+Just did a clean install and got my first chance to use this on my own
+behalf <https://usethis.r-lib.org/reference/use_blank_slate.html>
+
+R can save and reload the user's workspace between sessions via an
+.RData file in the current directory. However, long-term reproducibility
+is enhanced when you turn this feature off and clear R's memory at every
+restart. Starting with a blank slate provides timely feedback that
+encourages the development of scripts that are complete and
+self-contained. More detail can be found in the blog post
+[Project-oriented
+workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/).
+
+use_blank_slate(scope = c("user", "project")) Arguments scope\
+Edit globally for the current user, or locally for the current project
+
+## Others/General/Non-Categorized
+
+### [Making some fancy interactive tables using reactable](https://glin.github.io/reactable/articles/examples.html#custom-rendering)
+
+```{r}
+library(reactable)
+reactable(iris)
+reactable(iris,searchable = TRUE, minRows = 10)
+```
+
+[How to Make Beautiful Tables in
+R](https://rfortherestofus.com/2019/11/how-to-make-beautiful-tables-in-r/)
+
+A happy \#rstats accident I made today making a reprex. What happens
+when you make a reprex of nothing? Happy Wednesday to you too
+@JennyBryan !
+
+```{r}
+sprintf("Happy %s!", weekdays(Sys.Date()))
+```
+
+```{r}
+help("googlesheets4")
+library(googlesheets4)
+
+read_sheet(as_sheets_id("1BOuN7xu60VPFjlN6HU1QN2spQJcwwCiLoSMPQ9HZwmo"))
+```
+
+## Pointblank for data quality and data validation
+
+[Pointblank](https://github.com/rich-iannone/pointblank)
+
+```{r}
+mtcars %>%
+    with(lm(mpg ~ hp)) %>%
+    summary()
+```
+
+## reprex
+
+<https://speakerdeck.com/jennybc/reprex-reproducible-examples-with-r>
+
+<https://reprex.tidyverse.org/articles/articles/learn-reprex.html>
+
+<https://reprex.tidyverse.org/>
+
+Do once per R session
+
+```{r}
+library(reprex)
+```
+
+OR, do this once per machine and make it available yourself all the time
+
+```{r}
+usethis::edit_r_profile()
+```
+
+And then put this in \~/. Rprofile to make reprex available 24/7
+
+if (interactive()){
+
+suppressMessages(require(reprex))
+
+}
+
+## Git & Github
+
+top 10 git commands for Rstudio
+
+In the terminal,
+
+git config --global user.name "Onkar Singh"
+
+git config --global user.email onkaronkar4\@gmail.com
+
+git add .
+
+git commit --m "updated"
+
+git push
+
+n when prompted use the username: os2137
+
+password: Flutu\@2021
+
+git status
+
+<https://rviews.rstudio.com/2020/04/23/10-commands-to-get-started-with-git/>
+
+### Git Github and RStudio Cloud
+reference link
+https://www.youtube.com/watch?v=w6fivjMGZVo
+
+Step 1: 
+Step 2: git config --global user.email "onkaronkar4@gmail.com"
+Step 3: git config --global user.name "os2137"
+Step 4: git add . 
+step 5: git commit -m "first commit or such" 
+Step 6: git push
+Step 7: use the username  os2137 when prompted
+Step 8: use the Personal Access Token as Password
+
+Use this link to set up a Personal Access Token
+https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+
+Use this link to check whether you have HTTPS or not I have it as evidenced from 
+repo link
+https://docs.github.com/en/get-started/getting-started-with-git/managing-remote-repositories#switching-remote-urls-from-ssh-to-https
+
+
+related community question
+https://community.rstudio.com/t/github-authentication-from-rstudio-cloud-after-august-13/103253
+
+
+
+
