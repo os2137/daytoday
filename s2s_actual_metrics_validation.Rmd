@@ -1,0 +1,2804 @@
+---
+title: "s2s_actual_metrics_validation"
+author: "Onkar Singh"
+date: "9/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(janitor)
+library(lubridate)
+library(validate)
+
+```
+
+
+# Reading data from updated excel
+
+```{r}
+s2s_actual <- readxl::read_xlsx("live_grants.xlsx", sheet = "s2s_actuals") %>% 
+  clean_names() %>% 
+  mutate(report_date = as_date(report_date))
+
+
+s2s_pivot_long <- s2s_actual %>%
+ tidyr:: pivot_longer(
+    cols = actual_number_reached:total_actual_number_transformed, 
+    names_to = "metric",
+    values_to = "s2s", 
+    values_drop_na = TRUE)
+```
+
+
+
+
+###  data Wider/Original
+```{r}
+
+processed_actual <- s2s_actual %>%
+  mutate(report_date = ymd(report_date), 
+ 
+    report_month = month(report_date),
+    report_year = year(report_date),
+    adjustment = ifelse(report_month >= 9, 1, 0),
+    report_fiscal = report_year + adjustment,
+    report_fiscal = as.factor(report_fiscal)
+  ) 
+
+actual <- processed_actual %>% 
+  select(benchmark_grant_friendly_name, actual_number_reached:total_actual_number_transformed, report_fiscal,benchmark_beneficiary_country_location )
+
+```
+
+### data  Longer format
+```{r}
+processed_actual_pivot_long <- s2s_pivot_long %>%
+  mutate(report_date = ymd(report_date), 
+     report_month = month(report_date),
+    report_year = year(report_date),
+    adjustment = ifelse(report_month >= 9, 1, 0),
+    report_fiscal = report_year + adjustment,
+    report_fiscal = as.factor(report_fiscal)
+  ) 
+
+actual_long<- processed_actual_pivot_long %>% 
+  select(benchmark_grant_friendly_name,benchmark_beneficiary_country_location,
+         metric, s2s, report_fiscal)
+  
+
+```
+
+
+### S2S total across all grants
+```{r}
+s2s_actuals_grants <- actual %>% 
+   group_by(benchmark_grant_friendly_name) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+s2s_actuals_grants 
+```
+
+
+
+
+
+### S2S per FY Summary all actual metrics
+
+
+```{r}
+s2s_actuals_fy <- actual %>% 
+  group_by(report_fiscal) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+s2s_actuals_fy
+```
+
+### CIT
+```{r}
+cit_fy10_fy21 <- actual %>% 
+  filter(report_fiscal %in% 2010:2021) %>% 
+  select(contains("total")) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+cit_fy10_fy21
+```
+
+
+
+### all metrics
+
+```{r}
+all_metrics_fy10_fy21 <- actual %>% 
+  filter(report_fiscal %in% 2010:2021) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+all_metrics_fy10_fy21
+```
+
+### AgeGroup
+
+```{r}
+library(tidyr)
+agegroup <- processed_actual %>% 
+  filter(report_fiscal == 2021) %>% #use this line to filter FY specific details
+  select(actual_number_connected_adult,                 
+actual_number_connected_child,                
+actual_number_connected_youth,                
+actual_number_connected_unknown_other 
+         ) %>% 
+  pivot_longer(col = actual_number_connected_adult:actual_number_connected_unknown_other, 
+               names_to = "agegroup", 
+               values_to = "agegroup_total"
+               ) %>% 
+  group_by(agegroup) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T)) 
+  
+agegroup
+
+```
+
+### Country
+
+```{r}
+country <- actual %>% 
+  select(contains("total"), benchmark_beneficiary_country_location) %>% 
+  group_by(benchmark_beneficiary_country_location) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+country
+```
+
+### country_allmetrics
+```{r}
+country_allmetrics <- actual %>% 
+  group_by(benchmark_beneficiary_country_location) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+country_allmetrics
+```
+### FY
+
+```{r}
+fy <- actual %>% 
+  select(contains("total"), report_fiscal) %>% 
+  group_by(report_fiscal) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+fy
+```
+
+### fy_allmetrics
+
+```{r}
+fy_allmetrics <- actual %>% 
+  group_by(report_fiscal) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+fy_allmetrics
+```
+
+
+### Gender
+```{r}
+library(tidyr)
+gender <- processed_actual %>% 
+  
+  # filter(report_fiscal == 2021) %>% use this line to filter FY specific details
+  select(actual_number_connected_male,
+         actual_number_connected_female,
+         actual_number_connected_non_binary,           
+        actual_number_connected_prefer_not_to_answer
+         ) %>% 
+  pivot_longer(col = actual_number_connected_male:actual_number_connected_prefer_not_to_answer, 
+               names_to = "gender", 
+               values_to = "gender_total"
+               ) %>% 
+  group_by(gender) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T)) %>% 
+  select(gender, gender_total, everything())
+gender
+```
+
+ ### Grant
+
+```{r}
+grant <- actual %>% 
+  select(contains("total"), benchmark_grant_friendly_name) %>% 
+  group_by(benchmark_grant_friendly_name) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+grant
+```
+
+
+### Grant
+
+```{r}
+grant <- actual %>% 
+  select(contains("total"), benchmark_grant_friendly_name) %>% 
+  group_by(benchmark_grant_friendly_name) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+grant
+```
+
+
+### grant_allmetrics
+
+```{r}
+grant_allmetrics <- actual %>% 
+  group_by(benchmark_grant_friendly_name) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+grant_allmetrics
+```
+
+
+
+### AgeGroup_FY
+
+```{r}
+agegroup_fy <- actual_long %>% 
+   filter(report_fiscal == 2021) %>% #use this line to filter FY specific details
+  filter(metric%in%c("actual_number_connected_adult",                 
+          "actual_number_connected_child",                
+          "actual_number_connected_youth",                
+          "actual_number_connected_unknown_other" 
+         )) %>% 
+
+  group_by(metric,report_fiscal) %>% 
+  summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+  filter(agegroup_total !=0)
+  
+agegroup_fy
+```
+
+
+
+### AgeGroup_Country
+
+```{r}
+agegroup_country <- actual_long %>% 
+  filter(metric%in%c("actual_number_connected_adult",                 
+          "actual_number_connected_child",                
+          "actual_number_connected_youth",                
+          "actual_number_connected_unknown_other" 
+         )) %>% 
+
+  group_by(metric,benchmark_beneficiary_country_location, ) %>% 
+  summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+  filter(agegroup_total !=0)
+  
+agegroup_country
+```
+
+### AgeGroup_Gender
+
+
+
+### AgeGroup_Grant
+
+```{r}
+agegroup_grant <- actual_long %>% 
+  filter(report_fiscal == 2021) %>% #use this line to filter FY specific details
+  filter(metric%in%c("actual_number_connected_adult",                 
+          "actual_number_connected_child",                
+          "actual_number_connected_youth",                
+          "actual_number_connected_unknown_other" 
+         )) %>% 
+
+  group_by(metric,benchmark_grant_friendly_name) %>% 
+  summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+  filter(agegroup_total !=0)
+  
+agegroup_grant
+```
+
+
+
+### Country_AgeGroup
+
+```{r}
+country_agegroup <- actual_long %>% 
+  filter(metric%in%c("actual_number_connected_adult",                 
+          "actual_number_connected_child",                
+          "actual_number_connected_youth",                
+          "actual_number_connected_unknown_other" 
+         )) %>% 
+
+  group_by(benchmark_beneficiary_country_location, metric) %>% 
+  summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+  filter(agegroup_total !=0)
+  
+country_agegroup
+```
+
+
+### Country_FY
+
+```{r}
+country_fy <- actual %>% 
+  select(contains("total"), benchmark_beneficiary_country_location, report_fiscal) %>% 
+  group_by(benchmark_beneficiary_country_location, report_fiscal) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+country_fy 
+```
+
+### Country_FY_allmetrics
+```{r}
+country_fy_allmetrics <- actual %>% 
+  group_by(benchmark_beneficiary_country_location, report_fiscal) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+country_fy_allmetrics
+```
+
+### Country_Gender
+
+```{r}
+country_gender <- actual_long %>% 
+  filter(metric%in%c("benchmark_grant_friendly_name", "actual_number_connected_male",
+         "actual_number_connected_female",
+         "actual_number_connected_non_binary",                   "actual_number_connected_prefer_not_to_answer"
+         ))%>% 
+  
+  group_by(benchmark_beneficiary_country_location, metric) %>% 
+  summarize(gender_total = sum(s2s,na.rm =T)) %>% 
+  filter(gender_total != 0) 
+
+country_gender
+```
+
+
+### Country_Grant
+
+```{r}
+country_grant <- actual %>% 
+  select(contains("total"), benchmark_grant_friendly_name,
+         benchmark_beneficiary_country_location) %>% 
+  group_by( benchmark_beneficiary_country_location, benchmark_grant_friendly_name) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+country_grant
+```
+
+### country_grant_allmetris
+
+```{r}
+country_grant <- actual %>% 
+  group_by( benchmark_beneficiary_country_location, benchmark_grant_friendly_name) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+country_grant
+```
+
+### FY_AgeGroup
+
+
+```{r}
+fy_agegroup <- actual_long %>% 
+  filter(metric%in%c("actual_number_connected_adult",                 
+          "actual_number_connected_child",                
+          "actual_number_connected_youth",                
+          "actual_number_connected_unknown_other" 
+         )) %>% 
+
+  group_by(report_fiscal, metric) %>% 
+  summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+  filter(agegroup_total !=0)
+  
+fy_agegroup
+```
+
+
+### FY_Country
+
+```{r}
+ fy_country <- actual %>% 
+  select(contains("total"),  report_fiscal, benchmark_beneficiary_country_location) %>% 
+  group_by( report_fiscal, benchmark_beneficiary_country_location) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+fy_country
+```
+
+
+### FY_Gender
+
+```{r}
+fy_gender <- actual_long %>% 
+  filter(metric%in%c("benchmark_grant_friendly_name", "actual_number_connected_male",
+         "actual_number_connected_female",
+         "actual_number_connected_non_binary",                   "actual_number_connected_prefer_not_to_answer"
+         ))%>% 
+  
+  group_by(report_fiscal, metric) %>% 
+  summarize(gender_total = sum(s2s,na.rm =T)) %>% 
+  filter(gender_total != 0) 
+
+fy_gender
+```
+
+### FY_Grant
+
+```{r}
+fy_grant <- actual %>% 
+  select(contains("total"),  report_fiscal, benchmark_grant_friendly_name) %>% 
+  group_by( report_fiscal, benchmark_grant_friendly_name) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+fy_grant
+```
+
+### FY_Grant_allmetrics
+
+```{r}
+fy_grant_allmetrics <- actual %>% 
+  
+  group_by( report_fiscal, benchmark_grant_friendly_name) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+fy_grant_allmetrics
+```
+
+### Gender_AgeGroup
+
+```{r}
+# gender_agegroup <- actual_long %>% 
+#   filter(metric%in%c("actual_number_connected_adult",                 
+#           "actual_number_connected_child",                
+#           "actual_number_connected_youth",                
+#           "actual_number_connected_unknown_other" 
+#          )) %>% 
+# 
+#   group_by(benchmark_beneficiary_country_location, metric) %>% 
+#   summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+#   filter(agegroup_total !=0)
+#   
+# gender_agegroup
+```
+
+
+### Gender_Country
+
+```{r}
+gender_country <- actual_long %>% 
+  filter(metric%in%c("actual_number_connected_male",
+         "actual_number_connected_female",
+         "actual_number_connected_non_binary",                   "actual_number_connected_prefer_not_to_answer"
+         ))%>% 
+  
+  group_by( metric, benchmark_beneficiary_country_location) %>% 
+  summarize(gender_total = sum(s2s,na.rm =T)) %>% 
+  filter(gender_total != 0) 
+
+gender_country
+```
+
+
+### Gender_FY
+
+```{r}
+gender_fy<- actual_long %>% 
+  
+  filter(metric%in%c("actual_number_connected_male",
+         "actual_number_connected_female",
+         "actual_number_connected_non_binary",                   "actual_number_connected_prefer_not_to_answer"
+         ))%>% 
+  
+  group_by( metric, report_fiscal) %>% 
+  summarize(gender_total = sum(s2s,na.rm =T)) %>% 
+  filter(gender_total != 0) 
+
+gender_fy
+```
+
+
+### Gender_Grant
+
+```{r}
+gender_grant <- actual_long %>% 
+# filter(report_fiscal == 2021) %>% use this line to filter FY specific details
+  filter(metric%in%c( "actual_number_connected_male",
+         "actual_number_connected_female",
+         "actual_number_connected_non_binary",                   "actual_number_connected_prefer_not_to_answer"
+         ))%>% 
+  
+  group_by( metric, benchmark_grant_friendly_name) %>% 
+  summarize(gender_total = sum(s2s,na.rm =T)) %>% 
+  filter(gender_total != 0) 
+
+gender_grant
+```
+
+
+
+
+
+### Grant_AgeGroup
+
+```{r}
+grant_agegroup <- actual_long %>% 
+  filter(report_fiscal == 2021) %>% #use this line to filter FY specific details
+  filter(metric%in%c("actual_number_connected_adult",                 
+          "actual_number_connected_child",                
+          "actual_number_connected_youth",                
+          "actual_number_connected_unknown_other" 
+         )) %>% 
+
+  group_by(benchmark_grant_friendly_name, metric) %>% 
+  summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+  filter(agegroup_total !=0)
+  
+grant_agegroup
+```
+
+
+
+### Grant_Country
+
+
+```{r}
+grant_country <- actual %>% 
+  select(contains("total"), benchmark_grant_friendly_name,
+         benchmark_beneficiary_country_location) %>% 
+  group_by(benchmark_grant_friendly_name, benchmark_beneficiary_country_location) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+grant_country
+```
+
+### grant_country_allmetrics
+
+
+```{r}
+grant_country_allmetrics <- actual %>% 
+    group_by(benchmark_grant_friendly_name, benchmark_beneficiary_country_location) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+grant_country_allmetrics
+```
+
+### Grant_FY
+
+```{r}
+grant_fy <- actual %>% 
+  select(contains("total"), benchmark_grant_friendly_name, report_fiscal) %>% 
+  group_by(benchmark_grant_friendly_name, report_fiscal) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+grant_fy 
+```
+
+### grant_fy_allmetrics
+
+```{r}
+grant_fy_allmetrics <- actual %>% 
+  group_by(benchmark_grant_friendly_name, report_fiscal) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+grant_fy_allmetrics 
+```
+
+### Grant_Gender
+
+
+```{r}
+grant_gender <- actual_long %>% 
+# filter(report_fiscal == 2021) %>% use this line to filter FY specific details
+  filter(metric%in%c( "actual_number_connected_male",
+         "actual_number_connected_female",
+         "actual_number_connected_non_binary",                   "actual_number_connected_prefer_not_to_answer"
+         ))%>% 
+  
+  group_by(benchmark_grant_friendly_name, metric) %>% 
+  summarize(gender_total = sum(s2s,na.rm =T)) %>% 
+  filter(gender_total != 0) 
+
+grant_gender
+```
+
+
+###AgeGroup	Country	FY 	
+
+```{r}
+agegroup_country_fy <- actual_long %>% 
+  filter(metric%in%c("actual_number_connected_adult",                 
+          "actual_number_connected_child",                
+          "actual_number_connected_youth",                
+          "actual_number_connected_unknown_other" 
+         )) %>% 
+
+  group_by(metric,benchmark_beneficiary_country_location, report_fiscal) %>% 
+  summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+  filter(agegroup_total !=0)
+agegroup_country_fy
+```
+
+
+###AgeGroup	Country	Gender
+
+```{r}
+# agegroup_country_fy <- actual_long %>% 
+#   filter(metric%in%c("actual_number_connected_adult",                 
+#           "actual_number_connected_child",                
+#           "actual_number_connected_youth",                
+#           "actual_number_connected_unknown_other" 
+#          )) %>% 
+# 
+#   group_by(metric,benchmark_beneficiary_country_location, report_fiscal) %>% 
+#   summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+#   filter(agegroup_total !=0)
+# agegroup_country_fy
+```
+
+
+###AgeGroup	Country	Grant	
+
+```{r}
+agegroup_country_grant <- actual_long %>% 
+  filter(metric%in%c("actual_number_connected_adult",                 
+          "actual_number_connected_child",                
+          "actual_number_connected_youth",                
+          "actual_number_connected_unknown_other" 
+         )) %>% 
+
+  group_by(metric,benchmark_beneficiary_country_location, benchmark_grant_friendly_name) %>% 
+  summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+  filter(agegroup_total !=0)
+agegroup_country_grant
+```
+
+
+###AgeGroup	FY	Country		
+
+```{r}
+agegroup_fy_country <- actual_long %>% 
+  filter(metric%in%c("actual_number_connected_adult",                 
+          "actual_number_connected_child",                
+          "actual_number_connected_youth",                
+          "actual_number_connected_unknown_other" 
+         )) %>% 
+
+  group_by(metric,report_fiscal, benchmark_beneficiary_country_location) %>% 
+  summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+  filter(agegroup_total !=0)
+agegroup_fy_country
+```
+
+
+
+
+###AgeGroup	FY	Gender	
+
+
+
+###AgeGroup	FY	Grant		
+
+```{r}
+agegroup_fy_grant <- actual_long %>% 
+  filter(metric%in%c("actual_number_connected_adult",                 
+          "actual_number_connected_child",                
+          "actual_number_connected_youth",                
+          "actual_number_connected_unknown_other" 
+         )) %>% 
+
+  group_by(metric,report_fiscal, benchmark_grant_friendly_name) %>% 
+  summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+  filter(agegroup_total !=0)
+agegroup_fy_grant
+```
+
+
+###AgeGroup	Gender	Country	
+
+
+###AgeGroup	Gender	FY	
+
+
+
+
+###AgeGroup	Gender	Grant	
+
+
+
+###AgeGroup	Grant	Country	
+
+```{r}
+agegroup_grant_country <- actual_long %>% 
+  filter(metric%in%c("actual_number_connected_adult",                 
+          "actual_number_connected_child",                
+          "actual_number_connected_youth",                
+          "actual_number_connected_unknown_other" 
+         )) %>% 
+
+  group_by(metric,benchmark_grant_friendly_name, benchmark_beneficiary_country_location) %>% 
+  summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+  filter(agegroup_total !=0)
+agegroup_grant_country
+```
+
+
+###AgeGroup	Grant	FY	
+
+```{r}
+agegroup_grant_fy <- actual_long %>% 
+  filter(metric%in%c("actual_number_connected_adult",                 
+          "actual_number_connected_child",                
+          "actual_number_connected_youth",                
+          "actual_number_connected_unknown_other" 
+         )) %>% 
+
+  group_by(metric,benchmark_grant_friendly_name, report_fiscal) %>% 
+  summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+  filter(agegroup_total !=0)
+agegroup_grant_fy 
+```
+
+
+### AgeGroup	Grant	Gender
+
+
+
+
+
+
+### Country	AgeGroup	FY	
+
+```{r}
+country_agegroup_fy <- actual_long %>% 
+  filter(metric%in%c("actual_number_connected_adult",                 
+          "actual_number_connected_child",                
+          "actual_number_connected_youth",                
+          "actual_number_connected_unknown_other" 
+         )) %>% 
+
+  group_by(benchmark_beneficiary_country_location, metric, report_fiscal) %>% 
+  summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+  filter(agegroup_total !=0) 
+
+country_agegroup_fy
+```
+
+
+### Country	AgeGroup	Gender		
+
+### Country	AgeGroup	Grant		
+
+```{r}
+country_agegroup_grant <- actual_long %>% 
+  filter(metric%in%c("actual_number_connected_adult",                 
+          "actual_number_connected_child",                
+          "actual_number_connected_youth",                
+          "actual_number_connected_unknown_other" 
+         )) %>% 
+
+  group_by(benchmark_beneficiary_country_location, metric, benchmark_grant_friendly_name) %>% 
+  summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+  filter(agegroup_total !=0) 
+
+country_agegroup_grant
+```
+
+### Country	FY	AgeGroup	
+
+```{r}
+country_fy_agegroup <- actual_long %>% 
+  filter(metric%in%c("actual_number_connected_adult",                 
+          "actual_number_connected_child",                
+          "actual_number_connected_youth",                
+          "actual_number_connected_unknown_other" 
+         )) %>% 
+
+  group_by(benchmark_beneficiary_country_location,  report_fiscal, metric) %>% 
+  summarise(agegroup_total = sum(s2s, na.rm = T)) %>% 
+  filter(agegroup_total !=0) 
+
+country_fy_agegroup 
+```
+
+
+### Country	FY	Gender		
+
+```{r}
+country_fy_gender <- actual_long %>% 
+  filter(metric%in%c("actual_number_connected_male",
+         "actual_number_connected_female",
+         "actual_number_connected_non_binary",                   "actual_number_connected_prefer_not_to_answer"
+         ))%>% 
+  
+  group_by(benchmark_beneficiary_country_location, report_fiscal, metric) %>% 
+  summarize(gender_total = sum(s2s,na.rm =T)) %>% 
+  filter(gender_total != 0) 
+
+country_fy_gender
+```
+
+### Country	FY	Grant	
+
+```{r}
+country_fy_grant <- actual %>% 
+  select(contains("total"), benchmark_beneficiary_country_location, report_fiscal, benchmark_grant_friendly_name) %>% 
+  group_by(benchmark_beneficiary_country_location, report_fiscal, benchmark_grant_friendly_name) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+country_fy_grant
+```
+
+
+### Country	Gender	AgeGroup
+
+### Country	Gender	FY		
+
+```{r}
+country_gender_fy <- actual_long %>% 
+  filter(metric%in%c( "actual_number_connected_male",
+         "actual_number_connected_female",
+         "actual_number_connected_non_binary",                   "actual_number_connected_prefer_not_to_answer"
+         ))%>% 
+  
+  group_by(benchmark_beneficiary_country_location, metric, report_fiscal) %>% 
+  summarize(gender_total = sum(s2s,na.rm =T)) %>% 
+  filter(gender_total != 0) 
+
+country_gender_fy
+```
+
+### Country	Gender	Grant		
+
+```{r}
+country_gender_grant <- actual_long %>% 
+  filter(metric%in%c( "actual_number_connected_male",
+         "actual_number_connected_female",
+         "actual_number_connected_non_binary",                   "actual_number_connected_prefer_not_to_answer"
+         ))%>% 
+  
+  group_by(benchmark_beneficiary_country_location, metric, benchmark_grant_friendly_name) %>% 
+  summarize(gender_total = sum(s2s,na.rm =T)) %>% 
+  filter(gender_total != 0) 
+
+country_gender_grant
+```
+
+### Country	Grant	AgeGroup		
+
+
+### Country	Grant	FY		
+
+### Country	Grant	Gender
+
+
+
+
+### FY	AgeGroup	Country		
+
+### FY	AgeGroup	Gender		
+
+### FY	AgeGroup	Grant		
+
+### FY	Country	AgeGroup		
+
+### FY	Country	Gender		
+
+### FY	Country	Grant		
+
+### FY	Gender	AgeGroup		
+
+### FY	Gender	Country		
+
+### FY	Gender	Grant		
+
+### FY	Grant	AgeGroup		
+
+### FY	Grant	Country		
+
+### FY	Grant	Gender
+
+
+
+
+
+
+###  Gender	AgeGroup	Country		
+
+
+###  Gender	AgeGroup	FY		
+
+
+###  Gender	AgeGroup	Grant		
+
+
+###  Gender	Country	AgeGroup		
+
+
+###  Gender	Country	FY		
+
+
+###  Gender	Country	Grant		
+
+
+###  Gender	FY	AgeGroup		
+
+
+###  Gender	FY	Country		
+
+
+###  Gender	FY	Grant		
+
+
+###  Gender	Grant	AgeGroup
+
+### Gender	Grant	FY
+
+### Gender	Grant	Country		
+
+
+
+### Grant	AgeGroup	Country		
+
+
+### Grant	AgeGroup	FY		
+
+
+### Grant	AgeGroup	Gender		
+
+
+### Grant	Country	AgeGroup		
+
+
+### Grant	Country	FY		
+
+
+### Grant	Country	Gender		
+
+
+### Grant	FY	AgeGroup		
+
+
+### Grant	FY	Country		
+
+
+### Grant	FY	Gender		
+
+
+### Grant	Gender	AgeGroup		
+
+
+### Grant	Gender	Country		
+
+
+### Grant	Gender	FY
+
+
+
+### Grant_FY_Country
+
+```{r}
+cit_actual_grant_fy_country <- actual %>% 
+  select(contains("total"), benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
+  group_by(benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+cit_actual_grant_fy_country 
+```
+
+
+
+
+
+### AgeGroup	Country	FY	Gender	
+
+
+### AgeGroup	Country	FY	Grant	
+
+
+### AgeGroup	Country	Gender	FY	
+
+
+### AgeGroup	Country	Gender	Grant	
+
+
+### AgeGroup	Country	Grant	FY	
+
+
+### AgeGroup	Country	Grant	Gender	
+
+
+### AgeGroup	FY	Country	Gender	
+
+
+### AgeGroup	FY	Country	Grant	
+
+
+### AgeGroup	FY	Gender	Country	
+
+
+### AgeGroup	FY	Gender	Grant	
+
+
+### AgeGroup	FY	Grant	Country	
+
+
+### AgeGroup	FY	Grant	Gender	
+
+
+### AgeGroup	Gender	Country	FY	
+
+
+### AgeGroup	Gender	Country	Grant	
+
+
+### AgeGroup	Gender	FY	Country	
+
+
+### AgeGroup	Gender	FY	Grant	
+
+
+### AgeGroup	Gender	Grant	Country	
+
+
+### AgeGroup	Gender	Grant	FY	
+
+
+### AgeGroup	Grant	Country	FY	
+
+
+### AgeGroup	Grant	Country	Gender	
+
+
+### AgeGroup	Grant	FY	Country	
+
+
+### AgeGroup	Grant	FY	Gender	
+
+
+### AgeGroup	Grant	Gender	Country
+
+
+### AgeGroup	Grant	Gender	FY
+
+
+
+
+
+
+
+### Country	AgeGroup	FY	Gender	
+
+
+
+
+### Country	AgeGroup	FY	Grant	
+
+
+
+
+### Country	AgeGroup	Gender	FY	
+
+
+
+
+### Country	AgeGroup	Gender	Grant	
+
+
+
+
+### Country	AgeGroup	Grant	FY	
+
+
+
+
+### Country	AgeGroup	Grant	Gender	
+
+
+
+
+### Country	FY	AgeGroup	Gender	
+
+
+
+
+### Country	FY	AgeGroup	Grant	
+
+
+
+
+### Country	FY	Gender	AgeGroup	
+
+
+
+
+### Country	FY	Gender	Grant	
+
+
+
+
+### Country	FY	Grant	AgeGroup	
+
+
+
+
+### Country	FY	Grant	Gender	
+
+
+
+
+### Country	Gender	AgeGroup	FY	
+
+
+
+
+### Country	Gender	AgeGroup	Grant	
+
+
+
+
+### Country	Gender	FY	AgeGroup	
+
+
+
+
+### Country	Gender	FY	Grant	
+
+
+
+
+### Country	Gender	Grant	AgeGroup	
+
+
+
+
+### Country	Gender	Grant	FY	
+
+
+
+
+### Country	Grant	AgeGroup	FY	
+
+
+
+
+### Country	Grant	AgeGroup	Gender	
+
+
+
+
+### Country	Grant	FY	AgeGroup	
+
+
+
+
+### Country	Grant	FY	Gender
+
+
+
+
+### Country	Grant	Gender	AgeGroup	
+
+
+
+
+### Country	Grant	Gender	FY
+
+
+
+
+
+
+
+
+###  FY	AgeGroup	Country	Gender	
+
+
+
+
+###  FY	AgeGroup	Country	Grant	
+
+
+
+
+###  FY	AgeGroup	Gender	Country	
+
+
+
+
+###  FY	AgeGroup	Gender	Grant	
+
+
+
+
+###  FY	AgeGroup	Grant	Country	
+
+
+
+
+###  FY	AgeGroup	Grant	Gender	
+
+
+
+
+###  FY	Country	AgeGroup	Gender	
+
+
+
+
+###  FY	Country	AgeGroup	Grant	
+
+
+
+
+###  FY	Country	Gender	AgeGroup	
+
+
+
+
+###  FY	Country	Gender	Grant	
+
+
+
+
+###  FY	Country	Grant	AgeGroup	
+
+
+
+
+###  FY	Country	Grant	Gender	
+
+
+
+
+###  FY	Gender	AgeGroup	Country	
+
+
+
+
+###  FY	Gender	AgeGroup	Grant	
+
+
+
+
+###  FY	Gender	Country	AgeGroup	
+
+
+
+
+###  FY	Gender	Country	Grant	
+
+
+
+
+###  FY	Gender	Grant	AgeGroup	
+
+
+
+
+###  FY	Gender	Grant	Country	
+
+
+
+
+###  FY	Grant	AgeGroup	Country	
+
+
+
+
+###  FY	Grant	AgeGroup	Gender	
+
+
+
+
+###  FY	Grant	Country	AgeGroup	
+
+
+
+
+###  FY	Grant	Country	Gender	
+
+
+
+
+###  FY	Grant	Gender	AgeGroup	
+
+
+
+
+###  FY	Grant	Gender	Country
+
+
+
+
+
+
+
+
+### Gender	AgeGroup	Country	FY	
+
+
+
+
+### Gender	AgeGroup	Country	Grant	
+
+
+
+
+### Gender	AgeGroup	FY	Country	
+
+
+
+
+### Gender	AgeGroup	FY	Grant	
+
+
+
+
+### Gender	AgeGroup	Grant	Country	
+
+
+
+
+### Gender	AgeGroup	Grant	FY	
+
+
+
+
+### Gender	Country	AgeGroup	FY	
+
+
+
+
+### Gender	Country	AgeGroup	Grant	
+
+
+
+
+### Gender	Country	FY	AgeGroup	
+
+
+
+
+### Gender	Country	FY	Grant	
+
+
+
+
+### Gender	Country	Grant	AgeGroup	
+
+
+
+
+### Gender	Country	Grant	FY	
+
+
+
+
+### Gender	FY	AgeGroup	Country	
+
+
+
+
+### Gender	FY	AgeGroup	Grant	
+
+
+
+
+### Gender	FY	Country	AgeGroup	
+
+
+
+
+### Gender	FY	Country	Grant	
+
+
+
+
+### Gender	FY	Grant	AgeGroup	
+
+
+
+
+### Gender	FY	Grant	Country	
+
+
+
+
+### Gender	Grant	AgeGroup	Country	
+
+
+
+
+### Gender	Grant	AgeGroup	FY
+
+
+
+
+### Gender	Grant	Country	AgeGroup	
+
+
+
+
+### Gender	Grant	Country	FY	
+
+
+
+
+### Gender	Grant	FY	AgeGroup	
+
+
+
+
+### Gender	Grant	FY	Country	
+
+
+
+
+
+### Grant	AgeGroup	Country	FY
+
+
+
+
+
+
+### Grant	AgeGroup	Country	Gender	
+
+
+
+
+### Grant	AgeGroup	FY	Country	
+
+
+
+
+### Grant	AgeGroup	FY	Gender	
+
+
+
+
+### Grant	AgeGroup	Gender	Country	
+
+
+
+
+### Grant	AgeGroup	Gender	FY	
+
+
+
+
+### Grant	Country	AgeGroup	FY	
+
+
+
+
+### Grant	Country	AgeGroup	Gender	
+
+
+
+
+### Grant	Country	FY	AgeGroup	
+
+
+
+
+### Grant	Country	FY	Gender	
+
+
+
+
+### Grant	Country	Gender	AgeGroup	
+
+
+
+
+### Grant	Country	Gender	FY	
+
+
+
+
+### Grant	FY	AgeGroup	Country	
+
+
+
+
+### Grant	FY	AgeGroup	Gender	
+
+
+
+
+### Grant	FY	Country	AgeGroup	
+
+
+
+
+### Grant	FY	Country	Gender	
+
+
+
+
+### Grant	FY	Gender	AgeGroup	
+
+
+
+
+### Grant	FY	Gender	Country	
+
+
+
+
+### Grant	Gender	AgeGroup	Country
+
+
+
+
+### Grant	Gender	AgeGroup	FY	
+
+
+
+
+### Grant	Gender	Country	AgeGroup	
+
+
+
+
+### Grant	Gender	Country	FY	
+
+
+
+
+### Grant	Gender	FY	AgeGroup	
+
+
+
+
+### Grant	Gender	FY	Country	
+
+
+
+
+
+
+
+### AgeGroup	Country	FY	Gender	Grant
+
+
+
+
+### AgeGroup	Country	FY	Grant	Gender
+
+
+
+
+### AgeGroup	Country	Gender	FY	Grant
+
+
+
+
+### AgeGroup	Country	Gender	Grant	FY
+
+
+
+
+### AgeGroup	Country	Grant	FY	Gender
+
+
+
+
+### AgeGroup	Country	Grant	Gender	FY
+
+
+
+
+### AgeGroup	FY	Country	Gender	Grant
+
+
+
+
+### AgeGroup	FY	Country	Grant	Gender
+
+
+
+
+### AgeGroup	FY	Gender	Country	Grant
+
+
+
+
+### AgeGroup	FY	Gender	Grant	Country
+
+
+
+
+### AgeGroup	FY	Grant	Country	Gender
+
+
+
+
+### AgeGroup	FY	Grant	Gender	Country
+
+
+
+
+### AgeGroup	Gender	Country	FY	Grant
+
+
+
+
+### AgeGroup	Gender	Country	Grant	FY
+
+
+
+
+### AgeGroup	Gender	FY	Country	Grant
+
+
+
+
+### AgeGroup	Gender	FY	Grant	Country
+
+
+
+
+### AgeGroup	Gender	Grant	Country	FY
+
+
+
+
+### AgeGroup	Gender	Grant	FY	Country
+
+
+
+
+### AgeGroup	Grant	Country	FY	Gender
+
+
+
+
+### AgeGroup	Grant	Country	Gender	FY
+
+
+
+
+### AgeGroup	Grant	FY	Country	Gender
+
+
+
+
+### AgeGroup	Grant	FY	Gender	Country
+
+
+
+
+### AgeGroup	Grant	Gender	Country	FY
+
+
+
+
+### AgeGroup	Grant	Gender	FY	Country
+
+
+
+
+
+
+
+### Country	AgeGroup	FY	Gender	Grant
+
+
+
+
+### Country	AgeGroup	FY	Grant	Gender
+
+
+
+
+### Country	AgeGroup	Gender	FY	Grant
+
+
+
+
+### Country	AgeGroup	Gender	Grant	FY
+
+
+
+
+### Country	AgeGroup	Grant	FY	Gender
+
+
+
+
+### Country	AgeGroup	Grant	Gender	FY
+
+
+
+
+### Country	FY	AgeGroup	Gender	Grant
+
+
+
+
+### Country	FY	AgeGroup	Grant	Gender
+
+
+
+
+### Country	FY	Gender	AgeGroup	Grant
+
+
+
+
+### Country	FY	Gender	Grant	AgeGroup
+
+
+
+
+### Country	FY	Grant	AgeGroup	Gender
+
+
+
+
+### Country	FY	Grant	Gender	AgeGroup
+
+
+
+
+### Country	Gender	AgeGroup	FY	Grant
+
+
+
+
+### Country	Gender	AgeGroup	Grant	FY
+
+
+
+
+### Country	Gender	FY	AgeGroup	Grant
+
+
+
+
+### Country	Gender	FY	Grant	AgeGroup
+
+
+
+
+### Country	Gender	Grant	AgeGroup	FY
+
+
+
+
+### Country	Gender	Grant	FY	AgeGroup
+
+
+
+
+### Country	Grant	AgeGroup	FY	Gender
+
+
+
+
+### Country	Grant	AgeGroup	Gender	FY
+
+
+
+
+### Country	Grant	FY	AgeGroup	Gender
+
+
+
+
+### Country	Grant	FY	Gender	AgeGroup
+
+
+
+
+### Country	Grant	Gender	AgeGroup	FY
+
+
+
+
+### Country	Grant	Gender	FY	AgeGroup
+
+
+
+
+
+
+###  FY	AgeGroup	Country	Gender	Grant
+
+
+
+
+###  FY	AgeGroup	Country	Grant	Gender
+
+
+
+
+###  FY	AgeGroup	Gender	Country	Grant
+
+
+
+
+###  FY	AgeGroup	Gender	Grant	Country
+
+
+
+
+###  FY	AgeGroup	Grant	Country	Gender
+
+
+
+
+###  FY	AgeGroup	Grant	Gender	Country
+
+
+
+
+###  FY	Country	AgeGroup	Gender	Grant
+
+
+
+
+###  FY	Country	AgeGroup	Grant	Gender
+
+
+
+
+###  FY	Country	Gender	AgeGroup	Grant
+
+
+
+
+###  FY	Country	Gender	Grant	AgeGroup
+
+
+
+
+###  FY	Country	Grant	AgeGroup	Gender
+
+
+
+
+###  FY	Country	Grant	Gender	AgeGroup
+
+
+
+
+###  FY	Gender	AgeGroup	Country	Grant
+
+
+
+
+###  FY	Gender	AgeGroup	Grant	Country
+
+
+
+
+###  FY	Gender	Country	AgeGroup	Grant
+
+
+
+
+###  FY	Gender	Country	Grant	AgeGroup
+
+
+
+
+###  FY	Gender	Grant	AgeGroup	Country
+
+
+
+
+###  FY	Gender	Grant	Country	AgeGroup
+
+
+
+
+###  FY	Grant	AgeGroup	Country	Gender
+
+
+
+
+###  FY	Grant	AgeGroup	Gender	Country
+
+
+
+
+###  FY	Grant	Country	AgeGroup	Gender
+
+
+
+
+###  FY	Grant	Country	Gender	AgeGroup
+
+
+
+
+###  FY	Grant	Gender	AgeGroup	Country
+
+
+
+
+###  FY	Grant	Gender	Country	AgeGroup
+
+
+
+
+
+
+
+### Gender	AgeGroup	Country	FY	Grant
+
+
+
+
+### Gender	AgeGroup	Country	Grant	FY
+
+
+
+
+### Gender	AgeGroup	FY	Country	Grant
+
+
+
+
+### Gender	AgeGroup	FY	Grant	Country
+
+
+
+
+### Gender	AgeGroup	Grant	Country	FY
+
+
+
+
+### Gender	AgeGroup	Grant	FY	Country
+
+
+
+
+### Gender	Country	AgeGroup	FY	Grant
+
+
+
+
+### Gender	Country	AgeGroup	Grant	FY
+
+
+
+
+### Gender	Country	FY	AgeGroup	Grant
+
+
+
+
+### Gender	Country	FY	Grant	AgeGroup
+
+
+
+
+### Gender	Country	Grant	AgeGroup	FY
+
+
+
+
+### Gender	Country	Grant	FY	AgeGroup
+
+
+
+
+### Gender	FY	AgeGroup	Country	Grant
+
+
+
+
+### Gender	FY	AgeGroup	Grant	Country
+
+
+
+
+### Gender	FY	Country	AgeGroup	Grant
+
+
+
+
+### Gender	FY	Country	Grant	AgeGroup
+
+
+
+
+### Gender	FY	Grant	AgeGroup	Country
+
+
+
+
+### Gender	FY	Grant	Country	AgeGroup
+
+
+
+
+### Gender	Grant	AgeGroup	Country	FY
+
+
+
+
+### Gender	Grant	AgeGroup	FY	Country
+
+
+
+
+### Gender	Grant	Country	AgeGroup	FY
+
+
+
+
+### Gender	Grant	Country	FY	AgeGroup
+
+
+
+
+### Gender	Grant	FY	AgeGroup	Country
+
+
+
+
+### Gender	Grant	FY	Country	AgeGroup
+
+
+
+
+
+
+
+### Grant	AgeGroup	Country	FY	Gender
+
+
+
+
+### Grant	AgeGroup	Country	Gender	FY
+
+
+
+
+### Grant	AgeGroup	FY	Country	Gender
+
+
+
+
+### Grant	AgeGroup	FY	Gender	Country
+
+
+
+
+### Grant	AgeGroup	Gender	Country	FY
+
+
+
+
+### Grant	AgeGroup	Gender	FY	Country
+
+
+
+
+### Grant	Country	AgeGroup	FY	Gender
+
+
+
+
+### Grant	Country	AgeGroup	Gender	FY
+
+
+
+
+### Grant	Country	FY	AgeGroup	Gender
+
+
+
+
+### Grant	Country	FY	Gender	AgeGroup
+
+
+
+
+### Grant	Country	Gender	AgeGroup	FY
+
+
+
+
+### Grant	Country	Gender	FY	AgeGroup
+
+
+
+
+### Grant	FY	AgeGroup	Country	Gender
+
+
+
+
+### Grant	FY	AgeGroup	Gender	Country
+
+
+
+
+### Grant	FY	Country	AgeGroup	Gender
+
+
+
+
+### Grant	FY	Country	Gender	AgeGroup
+
+
+
+
+### Grant	FY	Gender	AgeGroup	Country
+
+
+
+
+### Grant	FY	Gender	Country	AgeGroup
+
+
+
+
+### Grant	Gender	AgeGroup	Country	FY
+
+
+
+
+### Grant	Gender	AgeGroup	FY	Country
+
+
+
+
+### Grant	Gender	Country	AgeGroup	FY
+
+
+
+
+### Grant	Gender	Country	FY	AgeGroup
+
+
+
+
+### Grant	Gender	FY	AgeGroup	Country
+
+
+
+
+### Grant	Gender	FY	Country	AgeGroup
+
+
+
+
+# Data Validation Rules
+
+
+```{r}
+
+processed_actual %>% 
+   names()
+
+```
+
+
+```{r}
+names(processed_actual_pivot_long)
+```
+
+## CIT Rules
+Connected > improved > transformed
+```{r}
+library(validate)
+cit_rules <- validator(
+  total_actual_number_connected >= total_actual_number_improved,
+  total_actual_number_improved >=   total_actual_number_transformed)
+
+
+```
+
+
+```{r}
+# output   <- confront(country_gender, all_rules) 
+# 
+# summary(output)
+# plot(output)
+# violating(country_gender, output)
+```
+
+## Gender CIT and CIT metrics gender Rules
+
+Connected male of a grant   is greater than or equal to  Connected male of Improved
+Connected female of a grant  is greater than or equal to Connected female of Improved
+Connected other gender category of a grant is greater than or equal to the connected other gender of the Improved level
+
+Improved male of a grant   is greater than or equal to   male of Trasnformed
+Improved female of a grant  is greater than or equal to  female of Transformed
+Improved other gender category of a grant is greater than or equal to the other gender of the Transformed level
+
+Connected total is the sum total total of all gender figures at the Connected level
+
+Improved total is the sume totlal of all gender figures at the Improved level
+Transformed total is the sume total of all gender at the Tranformed level
+
+
+```{r}
+gender_rules <- validator(
+total_actual_number_connected == 
+actual_number_connected_male + 
+actual_number_connected_female +
+actual_number_connected_non_binary + 
+actual_number_connected_prefer_not_to_answer,
+
+
+total_actual_number_improved == 
+actual_number_improved_male +                    
+actual_number_improved_female +            
+actual_number_improved_non_binary +             
+actual_number_improved_prefer_not_to_answer,
+
+
+total_actual_number_transformed == 
+actual_number_transformed_male +                
+actual_number_transformed_female +             
+actual_number_transformed_non_binary +         
+actual_number_transformed_prefer_not_to_answer,
+
+actual_number_connected_male  >=  actual_number_improved_male,
+actual_number_connected_female >= actual_number_improved_female,
+actual_number_connected_non_binary >=  actual_number_improved_non_binary,
+actual_number_connected_prefer_not_to_answer >= actual_number_improved_prefer_not_to_answer,
+
+actual_number_improved_male >=   actual_number_transformed_male,         
+actual_number_improved_female >=  actual_number_transformed_female,      
+actual_number_improved_non_binary >=    actual_number_transformed_non_binary,         
+actual_number_improved_prefer_not_to_answer >= actual_number_transformed_prefer_not_to_answer
+)
+```
+
+
+
+
+## CIT metrics Rules
+Connected total for all grants are sum total of all Connected level metrics. 
+
+Improved total for each grants are sum total of all improved metrics
+
+Transformed  total for each grant is sum total of all Transformed metrics 
+
+
+other outcomes = actual_number_employed_by_accenture, actual_number_increased_income
+
+
+```{r}
+cit_metric_rules <- validator(
+total_actual_number_connected == actual_number_reached,
+
+total_actual_number_improved == 
+actual_number_improved_mindset +                   actual_number_improved_career_management +
+actual_number_skilled +                         actual_number_obtained_work_experience, 
+
+total_actual_number_transformed ==
+actual_number_re_entered_formal_education  +  
+actual_number_employed +                   
+actual_number_grew_a_business +              
+actual_number_started_a_business +           
+actual_number_increased_career_resilience +   
+actual_number_self_employed, 
+
+actual_number_employed >= actual_number_employed_by_accenture
+
+)
+```
+
+
+
+
+## AgeGroup and AgeGroup CIT Rules
+
+Connected total is the sum totla of all age group figures at the Connected level
+
+Improved  total is the sum totla of all age group figures at the Improved level
+
+Transformed total is the sum totla of all age group figures at the transformed level
+
+```{r}
+agegroup_rules <- validator(
+  
+total_actual_number_connected == actual_number_connected_adult + 
+actual_number_connected_child +
+actual_number_connected_youth +
+actual_number_connected_unknown_other,
+
+
+total_actual_number_improved == actual_number_improved_adult +           actual_number_improved_youth +                 
+actual_number_improved_child +                  
+actual_number_improved_unknown_other, 
+
+
+total_actual_number_transformed == actual_number_transformed_adult  +    actual_number_transformed_youth  +     
+actual_number_transformed_child +        
+actual_number_transformed_unknown_other,  
+
+
+actual_number_connected_adult >= actual_number_improved_adult,
+actual_number_connected_child >= actual_number_improved_child,
+actual_number_connected_youth >= actual_number_improved_youth,
+actual_number_connected_unknown_other >= actual_number_improved_unknown_other,
+
+actual_number_improved_adult  >= actual_number_transformed_adult,       actual_number_improved_youth   >=   actual_number_transformed_youth,    actual_number_improved_child  >=  actual_number_transformed_child,      actual_number_improved_unknown_other >=  actual_number_transformed_unknown_other 
+)
+```
+
+## Country Rules
+At the country level, 
+the Connected figures are greater than or equal to the Improved figures
+The Improved figures are greater than or equal to the Tranformed level
+The Connected male figures are great than or equal to the Improved males figures 
+The Connected female figures are great than or equal to the Improved females figures 
+The Connected other gender category  figures are great than or equal to the Improved other gender figures 
+
+The Improved male figures are greater than or equal to the Tranformed male level
+
+The Improved female figures are greater than or equal to the Tranformed level
+
+The Improved other gender figures are greater than or equal to the other gender figures Tranformed level
+
+
+The Connected child  figures are greater than or equal to the Improved child figures 
+The Connected youth figures are great than or equal to the Improved youth figures 
+The Connected adult figures are great than or equal to the Improved adult figures 
+The Connected unknown demographics figures are great than or equal to the unknown demographics figures 
+
+## FY Rules
+
+for the FY level check if 
+the Connected figures are greater than or equal to the Improved figures
+The Improved figures are greater than or equal to the Tranformed level
+The Connected male figures are great than or equal to the Improved males figures 
+The Connected female figures are great than or equal to the Improved females figures 
+The Connected other gender category  figures are great than or equal to the Improved other gender figures 
+
+The Improved male figures are greater than or equal to the Tranformed male level
+
+The Improved female figures are greater than or equal to the Tranformed level
+
+The Improved other gender figures are greater than or equal to the other gender figures Tranformed level
+
+
+The Connected child  figures are greater than or equal to the Improved child figures 
+The Connected youth figures are great than or equal to the Improved youth figures 
+The Connected adult figures are great than or equal to the Improved adult figures 
+The Connected unknown demographics figures are great than or equal to the unknown demographics  figures 
+
+
+
+## Grant Rules
+Connected figures for all grants are greater than or equal to improved figures. Improved figures for all grants are greater than or equal to the Transformed figures
+
+At the grant level, 
+
+the Connected figures are greater than or equal to the Improved figures
+The Improved figures are greater than or equal to the Tranformed level
+The Connected male figures are great than or equal to the Improved males figures 
+The Connected female figures are great than or equal to the Improved females figures 
+The Connected other gender category  figures are great than or equal to the Improved other gender figures 
+
+The Improved male figures are greater than or equal to the Tranformed male level
+
+The Improved female figures are greater than or equal to the Tranformed level
+
+The Improved other gender figures are greater than or equal to the other gender figures Tranformed level
+
+
+The Connected child  figures are greater than or equal to the Improved child figures 
+The Connected youth figures are great than or equal to the Improved youth figures 
+The Connected adult figures are great than or equal to the Improved adult figures 
+The Connected unknown demographics figures are great than or equal to the unknown demographics youth figures 
+
+
+## Testing rules
+
+```{r}
+
+all_rules <- cit_rules + cit_metric_rules + gender_rules + agegroup_rules
+
+```
+
+
+### actual:Testing output 
+```{r}
+output   <- confront(actual, all_rules) 
+
+summary(output) %>% 
+  as_tibble() 
+  # %>% View - Use this to view file and choose the variable serial number
+# arrange(benchmark_grant_friendly_name) only use this to end just to check that all violations from lowest to highest has been identified. If we arrange before then the variable serial number will change which will create difficult in quickly inputting the violation number/order for getting the desired violation details.
+plot(output)
+```
+
+
+### actual:Violation cases
+
+```{r}
+violating(actual, output[11]) %>% 
+  select(benchmark_grant_friendly_name, actual_number_connected_female, actual_number_improved_female)%>% 
+  arrange(benchmark_grant_friendly_name)
+```
+
+
+```{r}
+violating(actual, output[26]) %>% 
+  select(benchmark_grant_friendly_name, actual_number_improved_youth, actual_number_transformed_youth)%>% 
+  arrange(benchmark_grant_friendly_name)
+```
+
+```{r}
+violating(actual, output[17]) %>% 
+  select(benchmark_grant_friendly_name, actual_number_improved_prefer_not_to_answer, actual_number_transformed_prefer_not_to_answer)%>% 
+  arrange(benchmark_grant_friendly_name)
+```
+
+```{r}
+violating(actual, output[15]) %>% 
+  select(benchmark_grant_friendly_name, actual_number_improved_female, actual_number_transformed_female)%>% 
+  arrange(benchmark_grant_friendly_name)
+```
+
+```{r}
+violating(actual, output[14]) %>% 
+  select(benchmark_grant_friendly_name, 
+actual_number_improved_male,  actual_number_transformed_male)%>% 
+  arrange(benchmark_grant_friendly_name)
+```
+
+```{r}
+violating(actual, output[14]) %>% 
+  select(benchmark_grant_friendly_name, 
+actual_number_improved_male,  actual_number_transformed_male)%>% 
+  arrange(benchmark_grant_friendly_name)
+```
+
+
+```{r}
+violating(actual, output[28]) %>% 
+  select(benchmark_grant_friendly_name, 
+actual_number_improved_unknown_other,  actual_number_transformed_unknown_other) %>% 
+  arrange(benchmark_grant_friendly_name)
+```
+
+```{r}
+violating(actual, output[2]) %>% 
+  select(benchmark_grant_friendly_name, 
+total_actual_number_improved, total_actual_number_transformed)
+
+
+```
+
+
+### country:Testing output 
+
+```{r}
+output   <- confront(country, all_rules) 
+
+summary(output) %>% 
+  as_tibble() 
+  # %>% View - Use this to view file and choose the variable serial number
+# arrange(benchmark_grant_friendly_name) only use this to end just to check that all violations from lowest to highest has been identified. If we arrange before then the variable serial number will change which will create difficult in quickly inputting the violation number/order for getting the desired violation details.
+plot(output)
+```
+
+
+
+### country: Violation cases 
+
+```{r}
+violating(country, output) 
+```
+
+
+
+### fy: Testing output
+
+```{r}
+output   <- confront(fy, all_rules) 
+
+summary(output) %>% 
+  as_tibble() 
+  # %>% View - Use this to view file and choose the variable serial number
+# arrange(benchmark_grant_friendly_name) only use this to end just to check that all violations from lowest to highest has been identified. If we arrange before then the variable serial number will change which will create difficult in quickly inputting the violation number/order for getting the desired violation details.
+plot(output)
+```
+
+
+
+### fy: Violation cases
+
+```{r}
+violating(fy, output) 
+```
+
+
+
+
+
+### grant:Testing output 
+
+```{r}
+output   <- confront(grant, all_rules) 
+
+summary(output) %>% 
+  as_tibble() 
+  # %>% View - Use this to view file and choose the variable serial number
+# arrange(benchmark_grant_friendly_name) only use this to end just to check that all violations from lowest to highest has been identified. If we arrange before then the variable serial number will change which will create difficult in quickly inputting the violation number/order for getting the desired violation details.
+plot(output)
+```
+
+### grant: Violation cases
+
+```{r}
+violating(grant, output) 
+```
+
+
+### country_allmetrics: Testing output
+
+```{r}
+output   <- confront(country_allmetrics, all_rules) 
+
+summary(output) %>% 
+  as_tibble() 
+  # %>% View - Use this to view file and choose the variable serial number
+# arrange(benchmark_grant_friendly_name) only use this to end just to check that all violations from lowest to highest has been identified. If we arrange before then the variable serial number will change which will create difficult in quickly inputting the violation number/order for getting the desired violation details.
+plot(output)
+```
+
+
+
+
+### country_allmetrics: Violation cases data: 
+
+```{r}
+violating(country_allmetrics, output) 
+```
+
+
+
+### fy_allmetrics: Testing output 
+
+```{r}
+output   <- confront(fy_allmetrics, all_rules) 
+
+summary(output) %>% 
+  as_tibble()
+  # %>% View - Use this to view file and choose the variable serial number
+# arrange(benchmark_grant_friendly_name) only use this to end just to check that all violations from lowest to highest has been identified. If we arrange before then the variable serial number will change which will create difficult in quickly inputting the violation number/order for getting the desired violation details.
+plot(output)
+```
+
+
+### fy_allmetrics: Violation cases
+
+```{r}
+violating(fy_allmetrics, output) 
+```
+
+```{r}
+violating(fy_allmetrics, output[24]) %>% 
+  select(report_fiscal, actual_number_connected_unknown_other, actual_number_improved_unknown_other)
+```
+
+
+```{r}
+violating(fy_allmetrics, output[26]) %>% 
+  select(report_fiscal, actual_number_improved_youth, 
+         actual_number_transformed_youth)
+```
+
+
+
+### grant_allmetrics: Testing output 
+
+```{r}
+output   <- confront(grant_allmetrics, all_rules) 
+
+summary(output) %>% 
+  as_tibble()
+
+  # %>% View - Use this to view file and choose the variable serial number
+# arrange(benchmark_grant_friendly_name) only use this to end just to check that all violations from lowest to highest has been identified. If we arrange before then the variable serial number will change which will create difficult in quickly inputting the violation number/order for getting the desired violation details.
+plot(output)
+```
+
+
+
+### grant_allmetrics: Violation cases data
+
+```{r}
+violating(grant_allmetrics, output) 
+```
+
+
+
+
+```{r}
+violating(grant_allmetrics, output[17]) %>% 
+  select(benchmark_grant_friendly_name, actual_number_improved_prefer_not_to_answer, actual_number_transformed_prefer_not_to_answer) %>% 
+arrange(benchmark_grant_friendly_name)
+
+```
+
+```{r}
+violating(grant_allmetrics, output[28]) %>% 
+  select(benchmark_grant_friendly_name, actual_number_improved_unknown_other , 
+         actual_number_transformed_unknown_other) %>% 
+arrange(benchmark_grant_friendly_name)
+
+
+```
+
+
+### country_fy_allmetrics: testing output
+
+```{r}
+output   <- confront(country_fy_allmetrics, all_rules) 
+
+summary(output) %>% 
+  as_tibble() %>% View() 
+
+plot(output)
+```
+
+### country_fy_allmetrics: Violation
+
+```{r}
+violating(country_fy_allmetrics, output) 
+```
+
+```{r}
+violating(country_fy_allmetrics, output[24]) %>% 
+  select(benchmark_beneficiary_country_location, report_fiscal,  actual_number_connected_unknown_other, actual_number_improved_unknown_other) %>% 
+arrange(benchmark_beneficiary_country_location)
+```
+
+```{r}
+violating(country_fy_allmetrics, output[26]) %>% 
+  select(benchmark_beneficiary_country_location, report_fiscal,  actual_number_improved_youth, actual_number_transformed_youth) %>% 
+arrange(benchmark_beneficiary_country_location)
+```
+```{r}
+violating(country_fy_allmetrics, output[11]) %>% 
+  select(benchmark_beneficiary_country_location, report_fiscal,  actual_number_connected_female, actual_number_improved_female) %>% 
+arrange(benchmark_beneficiary_country_location)
+```
+```{r}
+violating(country_fy_allmetrics, output[17]) %>% 
+  select(benchmark_beneficiary_country_location, report_fiscal,  actual_number_improved_prefer_not_to_answer, actual_number_transformed_prefer_not_to_answer) %>% 
+arrange(benchmark_beneficiary_country_location)
+```
+
+### country_grant_allmetrics
+
+
+```{r}
+
+```
+
+
+
+
+### fy_grant_allmetrics: testing output
+
+```{r}
+output   <- confront(fy_grant_allmetrics, all_rules) 
+
+summary(output) %>% 
+  as_tibble() 
+
+plot(output)
+```
+### fy_grant_allmetrics:Violations
+
+```{r}
+violating(fy_grant_allmetrics, output) 
+
+```
+
+
+```{r}
+violating(fy_grant_allmetrics, output[11]) %>% 
+  select(report_fiscal, benchmark_grant_friendly_name, actual_number_connected_female,  actual_number_improved_female) %>% 
+arrange(benchmark_grant_friendly_name)
+```
+
+```{r}
+violating(fy_grant_allmetrics, output[24]) %>% 
+  select(report_fiscal, benchmark_grant_friendly_name, actual_number_connected_unknown_other, actual_number_improved_unknown_other) %>% 
+arrange(benchmark_grant_friendly_name)
+```
+
+```{r}
+violating(fy_grant_allmetrics, output[26]) %>% 
+  select(report_fiscal, benchmark_grant_friendly_name, actual_number_improved_youth, actual_number_transformed_youth) %>% 
+arrange(benchmark_grant_friendly_name)
+```
+
+
+```{r}
+violating(fy_grant_allmetrics, output[14]) %>% 
+  select(report_fiscal, benchmark_grant_friendly_name, actual_number_improved_male, actual_number_transformed_male) %>% 
+arrange(benchmark_grant_friendly_name)
+```
+
+```{r}
+violating(fy_grant_allmetrics, output[15]) %>% 
+  select(report_fiscal, benchmark_grant_friendly_name, actual_number_improved_female, actual_number_transformed_female) %>% 
+arrange(benchmark_grant_friendly_name)
+```
+
+```{r}
+violating(fy_grant_allmetrics, output[17]) %>% 
+  select(report_fiscal, benchmark_grant_friendly_name, actual_number_improved_prefer_not_to_answer,actual_number_transformed_prefer_not_to_answer) %>% 
+arrange(benchmark_grant_friendly_name)
+
+```
+
+```{r}
+violating(fy_grant_allmetrics, output[28]) %>% 
+  select(report_fiscal, benchmark_grant_friendly_name, actual_number_improved_unknown_other, actual_number_transformed_unknown_other) %>% 
+arrange(benchmark_grant_friendly_name)
+```
+
+```{r}
+violating(fy_grant_allmetrics, output[2]) %>% 
+  select(report_fiscal, benchmark_grant_friendly_name, total_actual_number_improved, total_actual_number_transformed) %>% 
+arrange(benchmark_grant_friendly_name)
+```
+
+
+### grant_country_allmetrics: testing output
+
+```{r}
+output   <- confront(grant_country_allmetrics, all_rules) 
+
+summary(output) %>% 
+  as_tibble() %>% View()
+
+plot(output)
+```
+
+### grant_country_allmetrics: Violation
+
+```{r}
+violating(grant_country_allmetrics, output) 
+```
+
+
+```{r}
+violating(grant_country_allmetrics, output[17]) %>% 
+  select(benchmark_grant_friendly_name, benchmark_beneficiary_country_location, actual_number_improved_prefer_not_to_answer, actual_number_transformed_prefer_not_to_answer) %>% 
+arrange(benchmark_grant_friendly_name)
+```
+
+### grant_fy_allmetrics: testing output
+
+```{r}
+output   <- confront(grant_fy_allmetrics, all_rules) 
+
+summary(output) %>% 
+  as_tibble() %>% View()
+
+plot(output)
+```
+
+
+### grant_fy_allmetrics: Violation
+
+```{r}
+violating(grant_fy_allmetrics, output) 
+```
+
+```{r}
+violating(grant_fy_allmetrics, output) %>% 
+  select(benchmark_grant_friendly_name, report_fiscal, actual_number_improved_prefer_not_to_answer,  actual_number_transformed_prefer_not_to_answer) %>% 
+  arrange(benchmark_grant_friendly_name)
+```
+
+
+
+
+in FY21: Only three grants have reported PwD in FY21 YBI, RC3 and WEA 6 
+
+in FY21: The grants which reproted employed by Accenture in FY21 are : UpGlo2, Save 5, RC 3
+
+
+
+
+
+
+
+
+
+
+
+
+
