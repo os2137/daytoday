@@ -1,0 +1,384 @@
+---
+title: "s2s_actual_permutations_combinations"
+author: "Onkar Singh"
+date: "9/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(combinat)
+library(tidyverse)
+```
+
+```{r}
+# reference: https://www.r-bloggers.com/2020/09/permutations-in-r/
+
+
+my_list <- combinat::permn(c("Grant", "FY", "Country", "Gender", "Age_Group", "PwD"))
+
+my_matrix <- do.call(rbind, my_list)
+my_matrix <- unique(my_matrix)
+dim(my_matrix)
+head(my_matrix)
+my_matrix
+```
+
+### two elements
+
+```{r}
+library(gtools)
+# reference:https://davetang.org/muse/2013/09/09/combinations-and-permutations-in-r/
+
+dimensions <- c("Grant", "FY", "Country", "Gender", "Age_Group")
+
+# pick any two elements of the dimensions from the 6 elements from the vector
+
+# get all permutations with two elemetns of dimensions
+
+permutations(n = 5, r = 2, v = dimensions) %>% 
+  as_tibble() %>% 
+    arrange(V1)
+```
+
+### three elements
+
+```{r}
+# get all permutations with three  elemetns of dimensions
+
+permutations(n = 5, r = 3, v = dimensions) %>% 
+  as_tibble() %>% 
+    arrange(V1)
+```
+
+
+
+### four elements
+
+```{r}
+# get all permutations with four  elemetns of dimensions
+
+permutations(n = 5, r = 4, v = dimensions)%>% 
+  as_tibble() %>% 
+    arrange(V1)
+
+```
+
+### five elements
+```{r}
+# get all permutations with five  elements of dimensions
+
+permutations(n = 5, r = 5, v = dimensions)%>% 
+  as_tibble() %>% 
+    arrange(V1)
+
+```
+
+
+
+## permutation with replacements
+
+### two elements with replacement
+```{r}
+library(gtools)
+# reference:https://davetang.org/muse/2013/09/09/combinations-and-permutations-in-r/
+
+dimensions <- c("Grant", "FY", "Country", "Gender", "Age_Group")
+
+# pick any two elements of the dimensions from the 6 elements from the vector
+
+# get all permutations with two elemetns of dimensions with replacement
+
+permutations(n = 5, r = 2, v = dimensions, repeats.allowed=T)
+```
+
+
+### five elements with replacements
+```{r}
+five_elements <- permutations(n = 5, r = 5, v = dimensions, repeats.allowed=T)
+
+dim(five_elements)
+```
+
+
+
+
+
+
+### Reference
+
+
+```{r}
+library(dplyr)
+library(janitor)
+library(lubridate)
+library(validate)
+```
+
+
+# Reading data from updated excel
+
+```{r}
+s2s_actual <- readxl::read_xlsx("live_grants.xlsx", sheet = "s2s_actuals") %>% 
+  clean_names() %>% 
+  mutate(report_date = as_date(report_date))
+```
+
+
+## Processing 1: creating report fiscal column
+```{r}
+processed_actual <- s2s_actual %>%
+  mutate(report_date = ymd(report_date), 
+ 
+    report_month = month(report_date),
+    report_year = year(report_date),
+    adjustment = ifelse(report_month >= 9, 1, 0),
+    report_fiscal = report_year + adjustment,
+    report_fiscal = as.factor(report_fiscal)
+  ) 
+
+```
+
+### S2S total across all grants
+```{r}
+processed_actual %>% 
+  group_by(benchmark_grant_friendly_name) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+```
+
+
+
+
+
+### S2S per FY Summary all actual metrics
+
+
+```{r}
+processed_actual %>% 
+  select(-actual_percent_pw_d:-adjustment) %>% 
+  group_by(report_fiscal) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+```
+
+### CIT Summary per FY
+
+```{r}
+processed_actual %>% 
+  select(contains("total"), report_fiscal) %>% 
+  group_by(report_fiscal) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+```
+
+### CIT total actual per grant
+
+```{r}
+cit_actual_grant <- processed_actual %>% 
+  select(contains("total"), benchmark_grant_friendly_name) %>% 
+  group_by(benchmark_grant_friendly_name) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+cit_actual_grant
+```
+
+### CIT actual per grant per FY
+
+```{r}
+cit_actual_grant_fy <- processed_actual %>% 
+  select(contains("total"), benchmark_grant_friendly_name, report_fiscal) %>% 
+  group_by(benchmark_grant_friendly_name, report_fiscal) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+cit_actual_grant_fy 
+```
+
+CIT actual per grant per FY per country
+
+```{r}
+cit_actual_grant_fy_country <- processed_actual %>% 
+  select(contains("total"), benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
+  group_by(benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+cit_actual_grant_fy_country 
+```
+
+
+
+### CIT total actual per country
+
+```{r}
+cit_actual_country <- processed_actual %>% 
+  select(contains("total"), benchmark_beneficiary_country_location) %>% 
+  group_by(benchmark_beneficiary_country_location) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+cit_actual_country
+```
+
+
+### CIT actual per country per FY
+
+```{r}
+cit_actual_country_fy <- processed_actual %>% 
+  select(contains("total"), benchmark_beneficiary_country_location, report_fiscal) %>% 
+  group_by(benchmark_beneficiary_country_location, report_fiscal) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+
+cit_actual_country_fy
+```
+
+
+### CIT actual per country per FY per grant
+
+```{r}
+cit_actual_country_fy_grant <- processed_actual %>% 
+    select(contains("total"), benchmark_beneficiary_country_location, report_fiscal, benchmark_grant_friendly_name) %>% 
+  group_by(benchmark_beneficiary_country_location, report_fiscal, benchmark_grant_friendly_name) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+
+cit_actual_country_grant
+```
+
+
+[Calculate Combinations and Permutations in R](https://www.geeksforgeeks.org/calculate-combinations-and-permutations-in-r/)
+
+```{r}
+library(combinat)
+two_elem <- combn(dimensions[1:6], 2)
+two_elem 
+```
+
+```{r}
+three_elem <- combn(dimensions[1:6], 3)
+three_elem
+```
+
+```{r}
+four_elem <- combn(dimensions[1:6], 4)
+four_elem
+```
+
+
+```{r}
+five_elem <- combn(dimensions[1:6], 5)
+five_elem
+```
+
+```{r}
+six_elem <- combn(dimensions[1:6], 6)
+six_elem
+```
+
+
+
+## Data Validation Rules
+
+### CIT Rules
+Connected total for all grants are sum total of all Connected level metrics. 
+
+Improved total for each grants are sum total of all improved metrics
+
+Transformed  total for each grant is sum totla of all Transformed metrics 
+
+### CIT Gender Rules
+Connected male of a grant   is greater than or equal to  Connected male of Improved
+Connected female of a grant  is greater than or equal to Connected female of Improved
+Connected other gender category of a grant is greater than or equal to the connected other gender of the Improved level
+
+Improved male of a grant   is greater than or equal to   male of Trasnformed
+Improved female of a grant  is greater than or equal to  female of Transformed
+Improved other gender category of a grant is greater than or equal to the other gender of the Transformed level
+
+Connected total is the sum total total of all gender figures at the Connected level
+
+Improved total is the sume totlal of all gender figures at the Improved level
+Transformed total is the sume total of all gender at the Tranformed level
+
+
+### CIT Age Group Rules
+
+Connected total is the sum totla of all age group figures at the Connected level
+
+Improved  total is the sum totla of all age group figures at the Improved level
+
+Transformed total is the sum totla of all age group figures at the transformed level
+
+
+### CIT Grants Rules
+Connected figures for all grants are greater than or equal to improved figures. Improved figures for all grants are greater than or equal to the Transformed figures
+
+At the grant level, 
+
+the Connected figures are greater than or equal to the Improved figures
+The Improved figures are greater than or equal to the Tranformed level
+The Connected male figures are great than or equal to the Improved males figures 
+The Connected female figures are great than or equal to the Improved females figures 
+The Connected other gender category  figures are great than or equal to the Improved other gender figures 
+
+The Improved male figures are greater than or equal to the Tranformed male level
+
+The Improved female figures are greater than or equal to the Tranformed level
+
+The Improved other gender figures are greater than or equal to the other gender figures Tranformed level
+
+
+The Connected child  figures are greater than or equal to the Improved child figures 
+The Connected youth figures are great than or equal to the Improved youth figures 
+The Connected adult figures are great than or equal to the Improved adult figures 
+The Connected unknown demographics figures are great than or equal to the unknown demographics youth figures 
+
+
+
+### CIT FY Rules
+for the FY level check if 
+the Connected figures are greater than or equal to the Improved figures
+The Improved figures are greater than or equal to the Tranformed level
+The Connected male figures are great than or equal to the Improved males figures 
+The Connected female figures are great than or equal to the Improved females figures 
+The Connected other gender category  figures are great than or equal to the Improved other gender figures 
+
+The Improved male figures are greater than or equal to the Tranformed male level
+
+The Improved female figures are greater than or equal to the Tranformed level
+
+The Improved other gender figures are greater than or equal to the other gender figures Tranformed level
+
+
+The Connected child  figures are greater than or equal to the Improved child figures 
+The Connected youth figures are great than or equal to the Improved youth figures 
+The Connected adult figures are great than or equal to the Improved adult figures 
+The Connected unknown demographics figures are great than or equal to the unknown demographics youth figures 
+
+
+### CIT Country Rules
+At the country level, 
+the Connected figures are greater than or equal to the Improved figures
+The Improved figures are greater than or equal to the Tranformed level
+The Connected male figures are great than or equal to the Improved males figures 
+The Connected female figures are great than or equal to the Improved females figures 
+The Connected other gender category  figures are great than or equal to the Improved other gender figures 
+
+The Improved male figures are greater than or equal to the Tranformed male level
+
+The Improved female figures are greater than or equal to the Tranformed level
+
+The Improved other gender figures are greater than or equal to the other gender figures Tranformed level
+
+
+The Connected child  figures are greater than or equal to the Improved child figures 
+The Connected youth figures are great than or equal to the Improved youth figures 
+The Connected adult figures are great than or equal to the Improved adult figures 
+The Connected unknown demographics figures are great than or equal to the unknown demographics youth figures 
+
+### CIT Country FY Rules
+
+
+
+
+### CIT metrics Rules
+
+### CIT metrics gender rules
+
+
+
+

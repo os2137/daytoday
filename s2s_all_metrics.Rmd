@@ -1,0 +1,418 @@
+---
+title: 'Skills to Succeed Targets and Actuals'
+output:
+  html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE, 
+  message = FALSE, 
+  echo = FALSE)
+  
+```
+
+```{r}
+# load tidyverse for the data manipulation and visualization
+library(tidyverse)
+# load the Janitor for Clearning up the variable names
+library(janitor)
+library(lubridate) # for date and times
+library(readxl)
+library(writexl)
+
+library(knitr) # for making html tables neat using kable(table) function
+# library(xaringan) # to launch infinite_moonreader function for auto update
+library(DT)
+```
+
+## global_giving_grant_metrics_s2s_all
+
+[global_giving_grant_metrics_s2s_all](https://impactaccenture.lightning.force.com/lightning/r/Report/00O1I000007CYSJUA4/view?fv1=0061I000007Uc0m)
+
+```{r results = FALSE}
+
+# all_s2s <- read_csv("global_giving_grant_metrics_s2s_all.csv") %>%
+#   clean_names() %>% 
+#   mutate(across(is.logical, as.double))
+#  
+# 
+# glimpse(all_s2s) 
+# all_s2s
+
+
+
+```
+
+### data processed
+
+```{r data_processed, results = FALSE}
+processed <- all_s2s %>%
+  mutate(report_date = mdy(report_date), 
+ 
+    report_month = month(report_date),
+    report_year = year(report_date),
+    adjustment = ifelse(report_month >= 9, 1, 0),
+    report_fiscal = report_year + adjustment,
+    report_fiscal = as.factor(report_fiscal)
+  ) %>% 
+ pivot_longer(
+    cols = actual_number_connected_adult:total_target_number_transformed ,
+    names_to = "metric",
+    values_to = "s2s",
+    values_drop_na = TRUE
+  ) %>%
+  mutate(
+    metric = as.factor(metric))
+
+
+# %>%
+#   mutate(
+#     metric_summary = case_when(
+#       metric == "target_number_reached" ~ "Connected",
+#       metric == "target_number_skilled" ~ "Improved",
+#       metric == "target_number_obtained_work_experience" ~ "Improved",
+#       metric == "target_number_improved_mindset" ~ "Improved",
+#       metric == "target_number_improved_career_management" ~ "Improved",
+#       metric == "target_number_re_entered_formal_education" ~ "Transformed",
+#       metric == "target_number_increased_career_resilience" ~ "Transformed",
+#       metric == "target_number_increased_income"   ~ "Transformed",
+#       metric == "target_number_employed"   ~ "Transformed",
+#       metric == "target_number_self_employed"     ~ "Transformed",
+#       metric == "target_number_started_a_business"   ~ "Transformed",
+#       metric == "target_number_grew_a_business"     ~ "Transformed",
+#       TRUE ~ "Other"
+#     )
+#   )  
+
+
+
+# %>% 
+#   mutate(metric = as.character(metric)) %>% 
+#   separate(metric, c("a", "b"), extra = "merge") %>% 
+#   filter(!grepl('target', b)) %>% 
+#   mutate(across(is.character, as.factor)) %>% 
+#   rename(metric = b)
+
+
+  
+  
+```
+
+### All metric list
+
+```{r all_metrics_list, results = FALSE}
+levels(processed$metric)
+```
+
+### CIT target and actual for all grants
+
+```{r}
+cit_target_actual <- processed %>% 
+  # filter(report_fiscal%in% 2010:2020) %>% # to make it comment out this filter line
+  filter(str_detect(metric, "total")) %>% 
+  group_by(grant_friendly_name, metric) %>% 
+  summarize(total_s2s = sum(s2s)) %>% 
+  pivot_wider(names_from = metric, values_from = total_s2s) %>%  
+  select(grant_friendly_name, total_target_number_connected, total_target_number_improved, total_target_number_transformed, everything()) 
+
+
+cit_target_actual%>% 
+DT::datatable(filter = "top", extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download')
+      )
+  )
+  )
+
+```
+
+filter connected targeted for live grants for data check or update
+
+```{r}
+friendly_names_filter <- c("ACCES 2", "AMF/DQI/DQL FP", "Article 1_Jobready FP", "Article 1 Grant 2", "Aspen 1", "EfE 3", "FE 6 Single Step", "Foundation Forge - RC 3", "Fundacion ProEmpleo RC 3", "Fundaula Book Royalty Grant", "Goodwill 1", "JA 3", "Minuto de Dios - RC 3", "Norwegian Foundation Research", "Plan 6", "PLAN 8 Strategic Extension", "Rede Cidada - RC 3", "SAVE 5", "SAVE 6 Next Gen", "SAVE 7 Next Gen", "WEA 6/ Good Return 1", "YBI 5", "YBI 6 - YBI Strategic Extension", "LCD 5", "SAVE 8", "UNHCR GG Grant", "FE 5 Next Gen", "FY19  LC Success Coaching - Global", "LCD 4", "PLAN 7 Next Gen", "Human + Machine Book Royalty Grant", "AOGF", "UKOGF")
+
+cit_target_actual %>% 
+  filter(grant_friendly_name %in% friendly_names_filter) %>% 
+  select(grant_friendly_name, total_target_number_connected) 
+
+# datapasta::tribble_paste()
+# tibble::tribble(
+#                      ~grant_friendly_name, ~total_target_number_connected,
+#                                 "ACCES 2",                          40800,
+#                          "AMF/DQI/DQL FP",                         150000,
+#                       "Article 1 Grant 2",                         101003,
+#                   "Article 1_Jobready FP",                           5000,
+#                                 "Aspen 1",                         194700,
+#                                   "EfE 3",                          65762,
+#                           "FE 5 Next Gen",                           2350,
+#                        "FE 6 Single Step",                          19500,
+#             "Fundaula Book Royalty Grant",                           2250,
+#      "FY19  LC Success Coaching - Global",                             20,
+#                              "Goodwill 1",                          30050,
+#                                    "JA 3",                        2338246,
+#                                  "Plan 6",                          21444,
+#                         "PLAN 7 Next Gen",                            360,
+#              "PLAN 8 Strategic Extension",                           8100,
+#                      "Rede Cidada - RC 3",                           9234,
+#                                  "SAVE 5",                          57926,
+#                         "SAVE 6 Next Gen",                            200,
+#                         "SAVE 7 Next Gen",                         334264,
+#                    "WEA 6/ Good Return 1",                          37000,
+#                                   "YBI 5",                         190000,
+#         "YBI 6 - YBI Strategic Extension",                          77103
+#      )
+```
+
+### CIT FY target and actual for all grants
+
+```{r}
+processed %>% 
+  # filter(report_fiscal%in% 2010:2020) %>% # to make it comment out this filter line
+   filter(str_detect(metric, "total")) %>% 
+  group_by(grant_friendly_name, report_fiscal, metric) %>% 
+  summarize(total_s2s = sum(s2s)) %>% 
+  pivot_wider(names_from = metric, values_from = total_s2s) %>% 
+  select(grant_friendly_name, report_fiscal, total_target_number_connected, total_target_number_improved, total_target_number_transformed, everything()
+         ) %>% 
+  DT::datatable(filter = "top", extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download')
+      )
+  )
+  )
+  
+
+```
+
+### CIT Country target and actual for all grants
+
+```{r}
+processed %>% 
+  # filter(report_fiscal%in% 2010:2020) %>% # to make it comment out this filter line
+  filter(str_detect(metric, "total")) %>% 
+    group_by(grant_friendly_name, beneficiary_country, metric) %>% 
+  summarize(total_s2s = sum(s2s)) %>% 
+  pivot_wider(names_from = metric, values_from = total_s2s) %>% 
+  select(grant_friendly_name, beneficiary_country, total_target_number_connected, total_target_number_improved, total_target_number_transformed, everything()) %>% 
+  DT::datatable(filter = "top", extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download')
+      )
+  )
+  )
+```
+
+### CIT Country FY target and actual for all grants
+
+```{r}
+processed %>% 
+  # filter(report_fiscal%in% 2010:2020) %>% # to make it comment out this filter line
+  filter(str_detect(metric, "total")) %>% 
+    group_by(grant_friendly_name, beneficiary_country, report_fiscal, metric) %>% 
+  summarize(total_s2s = sum(s2s)) %>% 
+  pivot_wider(names_from = metric, values_from = total_s2s) %>% 
+  select(grant_friendly_name, beneficiary_country, report_fiscal, total_target_number_connected, total_target_number_improved, total_target_number_transformed, everything()) %>% 
+  DT::datatable(filter = "top", extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download')
+      )
+  )
+  )
+```
+
+### CIT target and actual per grant/ per organization
+
+```{r results = FALSE}
+cit <- processed %>% 
+  # filter(report_fiscal%in% 2010:2020) %>% # to make it comment out this filter line
+  filter(str_detect(metric, "total")) %>% 
+  filter(str_detect(grant_friendly_name, "PLAN|Plan")) %>% 
+  group_by(grant_friendly_name, metric) %>% 
+  summarize(total_s2s = sum(s2s)) %>% 
+  pivot_wider(names_from = metric, values_from = total_s2s)
+  
+```
+
+### CIT per Country target and actual per organization
+
+```{r results = FALSE}
+processed %>% 
+  # filter(report_fiscal%in% 2010:2020) %>% # to make it comment out this filter line
+  filter(str_detect(metric, "total")) %>% 
+  filter(str_detect(grant_friendly_name, "PLAN|Plan")) %>% 
+  group_by(grant_friendly_name, beneficiary_country, metric) %>% 
+  summarize(total_s2s = sum(s2s)) %>% 
+  pivot_wider(names_from = metric, values_from = total_s2s)
+```
+
+### CIT FY10:FY20 target and actual per FY per country per grant/ per organization
+
+```{r results = FALSE}
+processed %>% 
+  filter(report_fiscal%in% 2010:2022) %>% # to make it comment out this filter line
+  filter(str_detect(metric, "total")) %>% 
+  filter(str_detect(grant_friendly_name, "ACCES")) %>% 
+  group_by(grant_friendly_name, report_fiscal, beneficiary_country, metric) %>% 
+  summarize(total_s2s = sum(s2s)) %>% 
+  pivot_wider(names_from = metric, values_from = total_s2s) %>% 
+  filter(grant_friendly_name == "ACCES 2")
+
+```
+
+### FRIENDLY NAME
+
+```{r friendly_name,  results = FALSE}
+processed$grant_friendly_name %>% 
+  unique()
+
+```
+
+```{r}
+cit_metrics <- c("total_actual_number_connected", "total_target_number_connected", "total_actual_number_improved", "total_target_number_improved", "total_actual_number_transformed", "total_target_number_transformed" )
+
+cit_details <- c(
+  "actual_number_reached",
+  "actual_number_skilled",
+  "actual_number_employed",
+  "actual_number_employed_by_accenture",
+  "actual_number_grew_a_business",
+  "actual_number_obtained_work_experience",
+  "actual_number_re_entered_formal_education",
+  "actual_number_started_a_business",
+  "target_number_reached",
+   "target_number_skilled",
+  "target_number_employed",
+  "target_number_employed_by_accenture",
+  "target_number_grew_a_business",
+  "target_number_improved_career_management",
+  "target_number_improved_mindset",
+  "target_number_increased_career_resilience",
+  "target_number_obtained_work_experience",
+  "target_number_re_entered_formal_education",
+  "target_number_self_employed",
+  "target_number_started_a_business")
+
+gender_metrics <- c("actual_number_connected_adult",
+  "actual_number_connected_child",
+  "actual_number_connected_female",
+  "actual_number_connected_male",
+  "actual_number_connected_non_binary",
+  "actual_number_connected_prefer_not_to_answer",
+  "actual_number_connected_unknown_other",
+  "actual_number_connected_youth",
+  "actual_number_employed",
+  "actual_number_employed_by_accenture",
+  "actual_number_grew_a_business",
+  "actual_number_obtained_work_experience",
+  "actual_number_re_entered_formal_education",
+  "actual_number_reached",
+  "actual_number_skilled",
+  "actual_number_started_a_business",
+  "target_number_employed",
+  "target_number_employed_by_accenture",
+  "target_number_grew_a_business",
+  "target_number_improved_career_management",
+  "target_number_improved_mindset",
+  "target_number_increased_career_resilience",
+  "target_number_obtained_work_experience",
+  "target_number_re_entered_formal_education",
+  "target_number_reached",
+  "target_number_self_employed",
+  "target_number_skilled",
+  "target_number_started_a_business")
+
+adult_child_youth <- c("actual_number_connected_adult",
+  "actual_number_connected_child",
+  "actual_number_connected_female",
+  "actual_number_connected_male",
+  "actual_number_connected_non_binary",
+  "actual_number_connected_prefer_not_to_answer",
+  "actual_number_connected_unknown_other",
+  "actual_number_connected_youth",
+  "actual_number_employed",
+  "actual_number_employed_by_accenture",
+  "actual_number_grew_a_business",
+  "actual_number_obtained_work_experience",
+  "actual_number_re_entered_formal_education",
+  "actual_number_reached",
+  "actual_number_skilled",
+  "actual_number_started_a_business",
+  "target_number_employed",
+  "target_number_employed_by_accenture",
+  "target_number_grew_a_business",
+  "target_number_improved_career_management",
+  "target_number_improved_mindset",
+  "target_number_increased_career_resilience",
+  "target_number_obtained_work_experience",
+  "target_number_re_entered_formal_education",
+  "target_number_reached",
+  "target_number_self_employed",
+  "target_number_skilled",
+  "target_number_started_a_business")
+
+
+
+
+non_cit_metrics <- processed %>% 
+  # filter(report_fiscal%in% 2010:2020) %>% # to make it comment out this filter line
+  filter(metric %in% cit_details) %>% 
+  mutate(metric_calc = case_when(
+   metric ==  "target_number_employed" ~ "target_transformed", 
+ metric == "target_number_employed_by_accenture" ~ "target_transformed_subset", 
+  metric == "target_number_grew_a_business" ~ "target_transformed",
+  metric == "target_number_improved_career_management" ~ "target_improved" ,
+  metric == "target_number_improved_mindset" ~ "target_improved", 
+  metric == "target_number_increased_career_resilience" ~ "target_transformed",
+ metric ==  "target_number_obtained_work_experience" ~ "target_improved",
+ metric == "target_number_re_entered_formal_education" ~  "target_transformed",
+ metric == "target_number_reached" ~ "target_connected",
+  metric == "target_number_self_employed" ~ "target_transformed",
+ metric ==  "target_number_skilled" ~ "target_improved",
+  metric == "target_number_started_a_business" ~ "target_transformed",
+ metric == "actual_number_reached"                     ~ "actual_connected"   ,
+ metric ==  "actual_number_skilled" ~ "actual_improved",
+ metric ==  "actual_number_employed" ~ "actual_transformed",
+ metric ==  "actual_number_employed_by_accenture" ~ "actual_transformed_subset",
+ metric ==  "actual_number_grew_a_business" ~ "actual_transformed",
+ metric ==  "actual_number_obtained_work_experience" ~ "actual_improved",
+ metric ==  "actual_number_re_entered_formal_education" ~ "actual_transformed",
+ metric ==  "actual_number_started_a_business" ~ "actual_transformed",
+ 
+  TRUE ~ "other" ))
+ 
+  
+ non_cit_metrics %>% 
+  count(metric_calc, metric, sort = T)
+ 
+ 
+    # DataEditR::data_edit(x = non_cit_metrics_count )
+
+
+```
+
+### S2S_Targets_2025
+
+[2025_All Grants_Any Status S2S Targets](https://impactaccenture.lightning.force.com/lightning/r/Report/00O1I000006hYmhUAE/view?queryScope=userFolders)
+
+\#\#\#S2S_Actuals_2025
+
+[All Grant S2S Report_Actuals_2025](https://impactaccenture.lightning.force.com/lightning/r/Report/00O1I000007CmwJUAS/view?queryScope=userFolders)
+
+\#\#\#REFERENCE ONLY

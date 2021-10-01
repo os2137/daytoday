@@ -1,0 +1,469 @@
+---
+title: "Payment Details"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  word_document: default
+  html_document: default
+theme: flatly
+toc: yes
+toc_float: yes
+---
+
+```{r add this yaml for word document print}
+# output:
+#   word_document: default
+#   html_document:
+#     code_download: yes
+#   pdf_document: default
+# theme: flatly
+# toc: yes
+# toc_float: yes
+```
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE, 
+  message = FALSE, 
+  echo = FALSE
+)
+
+```
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(writexl)
+library(ggrepel)
+```
+
+### Payments/Disbursements
+
+[**gg_payments_scheduled_and_actual report link**](https://impactaccenture.lightning.force.com/lightning/r/Report/00O1I000006ho72UAA/view)
+
+### Step 1: Reading the file
+
+```{r}
+# Reading the file
+bookroyaltiesgrants <- c("Fundaula Book Royalty Grant", 
+                         "FY19 LC Success Coaching - Global", "Human + Machine Book Royalty Grant", "ELBA"
+                         )
+payments <- read_csv("gg_payments_scheduled_and_actual.csv") %>%
+  clean_names() %>% 
+  filter(!friendly_name %in% bookroyaltiesgrants)
+  
+
+```
+
+### Grant Statuses
+
+```{r}
+payments %>% 
+  count(grant_status)
+```
+
+```{r}
+payments <- payments %>% 
+  filter(!grant_status %in% c("In Progress", "New"))
+```
+
+### Step 2: Data Processing 2
+
+```{r}
+# Data Processing Step 1
+payments_processed <- payments %>%
+  filter(type_of_payment == "Cash") %>%
+  mutate(
+    scheduled_payment_date = mdy(scheduled_payment_date),
+    due_date_month = month(scheduled_payment_date),
+    due_date_year = year(scheduled_payment_date),
+    adjustment = as.integer(due_date_month >= 9),
+    fiscal_year = due_date_year + adjustment
+  )
+```
+
+### Step 3: Data Processing 3
+
+```{r}
+# Data Processing Step 2
+payments_processed <- payments_processed %>%
+  mutate(fdn_cat = if_else(funding_foundation == "US Foundation", "US Fdn", "Other Fdn")) %>%
+  mutate(
+    live_pipe = case_when(
+      .$grant_status %in% c("New", "In Progress") ~ "Pipeline",
+      .$grant_status %in% c("Signed", "Launched", "Ready for Closure") ~ "Live",
+      TRUE ~ "Closed"
+    )
+  ) %>%
+  select(
+    funding_foundation,
+    fdn_cat,
+    live_pipe,
+    friendly_name,
+    grant_status,
+    scheduled_payment_date,
+    scheduled_amount,
+    actual_payment_date,
+    actual_amount,
+    fiscal_year
+  ) 
+```
+
+## Live+Closed (to get the full figures we have to filter grant status != Pipe, since we also need figures for closed grants to get the full figure per FY)
+
+### Summary committed and actual per FY/YTD
+
+```{r results = TRUE}
+
+live_plus_pipe_per_fy <- payments_processed %>%
+  arrange(scheduled_payment_date) %>%
+    group_by(fiscal_year, funding_foundation, friendly_name) %>%
+        summarize(
+    scheduled_totalytd = sum(scheduled_amount, na.rm = T),
+    actual_totalytd = sum(actual_amount, na.rm = T)) 
+
+live_plus_pipe_per_fy%>% 
+  DT::datatable(filter = "top", extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download')
+      )
+  )
+  )
+
+
+# writexl::write_xlsx("Australia_Fdn_FY20-FY22.xlsx")
+  
+```
+
+### Summary committed and actual Live (+ clsoed if any)) Grants per FY/YTD
+
+```{r,  results = 'asis'}
+
+live_grants_per_fy <- payments_processed %>%
+  filter(live_pipe != "Pipe") %>%
+  arrange(scheduled_payment_date) %>%
+  group_by(fiscal_year) %>%
+  summarize(
+    scheduled_totalytd = sum(scheduled_amount, na.rm = T),
+    actual_totalytd = sum(actual_amount, na.rm = T)
+      )
+live_grants_per_fy
+```
+
+```{r results = TRUE}
+# Summary committed and actual Live Grants US Fdn per FY/YTD
+live_grants_per_fy_us_fdn <- payments_processed %>%
+  filter(live_pipe != "Pipe",
+         fdn_cat == "US Fdn") %>%
+  arrange(scheduled_payment_date) %>%
+  group_by(fiscal_year) %>%
+  summarize(
+    scheduled_totalytd = sum(scheduled_amount, na.rm = T),
+    actual_totalytd = sum(actual_amount, na.rm = T)
+  )
+live_grants_per_fy_us_fdn
+```
+
+### Summary committed and actual Live Grants (+ clsoed if any) Other Fdn per FY/YTD
+
+```{r results = TRUE}
+
+live_grants_per_fy_other_fdn <- payments_processed %>%
+  filter(live_pipe != "Pipe",
+         fdn_cat == "Other Fdn") %>%
+  arrange(scheduled_payment_date) %>%
+  group_by(fiscal_year) %>%
+  summarize(
+    scheduled_totalytd = sum(scheduled_amount, na.rm = T),
+    actual_totalytd = sum(actual_amount, na.rm = T)
+  )
+live_grants_per_fy_other_fdn 
+```
+
+### Summary committed and actual Live (+ clsoed if any) Grants per year per Fdn
+
+```{r results = TRUE}
+
+live_grants_per_fy_other_fdn <- payments_processed %>%
+  filter(live_pipe != "Pipe") %>%
+  arrange(scheduled_payment_date) %>%
+  group_by(fiscal_year, fdn_cat) %>%
+  summarize(
+    scheduled_totalytd = sum(scheduled_amount, na.rm = T),
+    actual_totalytd = sum(actual_amount, na.rm = T)
+  )
+live_grants_per_fy_other_fdn 
+ 
+```
+
+### Summary committed and actual Live(+ clsoed if any) Grants per year per Individual Fdn
+
+```{r ,  results = TRUE}
+
+
+live_grants_per_fy_other_fdn <- payments_processed %>%
+  filter(live_pipe != "Pipe") %>%
+  arrange(scheduled_payment_date) %>%
+  group_by(fiscal_year, funding_foundation) %>%
+  summarize(
+    scheduled_totalytd = sum(scheduled_amount, na.rm = T),
+    actual_totalytd = sum(actual_amount, na.rm = T)
+  )
+live_grants_per_fy_other_fdn 
+# %>% filter(fiscal_year == 2020) just use this added line in the code chunk above/below to get an FY picture per foundation n basis other groups that follow
+ 
+```
+
+### Summary committed and actual Live (+ clsoed if any) Grants per year per Fdn
+
+```{r results = TRUE}
+
+live_grants_per_fy_other_fdn <- payments_processed %>%
+  filter(live_pipe != "Pipe") %>%
+  arrange(scheduled_payment_date) %>%
+  group_by(fiscal_year, fdn_cat, grant_status, friendly_name) %>%
+  summarize(
+    scheduled_totalytd = sum(scheduled_amount, na.rm = T),
+    actual_totalytd = sum(actual_amount, na.rm = T)
+  )
+live_grants_per_fy_other_fdn 
+```
+
+### Summary committed and actual Live (+ closed if any)Grants per year per Individual Foundation
+
+```{r}
+
+live_grants_per_fy_other_fdn <- payments_processed %>%
+  filter(live_pipe != "Pipe") %>%
+  arrange(scheduled_payment_date) %>%
+  group_by(fiscal_year, funding_foundation, grant_status, friendly_name) %>%
+  summarize(
+    scheduled_totalytd = sum(scheduled_amount, na.rm = T),
+    actual_totalytd = sum(actual_amount, na.rm = T)
+  )
+live_grants_per_fy_other_fdn 
+# %>%  filter(fiscal_year ==2020) use this step for per year picture
+
+
+##Pipeline starts
+### Summary committed  Pipeline Grants per FY/YTD
+
+```
+
+```{r}
+
+pipeline_grants_per_fy <- payments_processed %>%
+  filter(live_pipe == "Pipeline") %>%
+  arrange(scheduled_payment_date) %>%
+  group_by(fiscal_year) %>%
+  summarize(
+    scheduled_totalytd = sum(scheduled_amount, na.rm = T),
+    actual_totalytd = sum(actual_amount, na.rm = T)
+  )
+pipeline_grants_per_fy %>% 
+  knitr::kable()
+```
+
+## Pipeline starts here
+
+### Summary committed Pipeline Grants US Fdn per FY/YTD
+
+```{r}
+
+pipeline_grants_per_fy_us_fdn <- payments_processed %>%
+  filter(live_pipe == "Pipeline",
+         fdn_cat == "US Fdn") %>%
+  arrange(scheduled_payment_date) %>%
+  group_by(fiscal_year) %>%
+  summarize(
+    scheduled_totalytd = sum(scheduled_amount, na.rm = T),
+    actual_totalytd = sum(actual_amount, na.rm = T)
+  )
+pipeline_grants_per_fy_us_fdn %>% 
+  knitr::kable()
+```
+
+### Summary committed Pipeline Grants Other Fdn per FY/YTD
+
+```{r}
+pipeline_grants_per_fy_other_fdn <- payments_processed %>%
+  filter(live_pipe == "Pipeline",
+         fdn_cat == "Other Fdn") %>%
+  arrange(scheduled_payment_date) %>%
+  group_by(fiscal_year) %>%
+  summarize(
+    scheduled_totalytd = sum(scheduled_amount, na.rm = T),
+    actual_totalytd = sum(actual_amount, na.rm = T)
+  )
+pipeline_grants_per_fy_other_fdn %>% 
+  knitr::kable()
+```
+
+### Current FY Payment Details
+
+```{r}
+
+payments_fy21 <- payments_processed %>%
+  filter(fiscal_year == 2021)%>%
+   filter(!grant_status%in%c("New", "In Progress"), 
+         !friendly_name %in% c("Fundaula Book Royalty Grant")) %>% 
+  select(
+    fiscal_year,
+    friendly_name,
+    grant_status,
+    scheduled_payment_date,
+    scheduled_amount,
+    actual_payment_date,
+    actual_amount
+  ) %>%
+  arrange(friendly_name) 
+payments_fy21 %>% 
+   # knitr::kable()
+  flextable::flextable() %>% 
+  flextable::border_inner() %>% 
+  flextable::border_outer() %>% 
+  flextable::colformat_num(j = c(5,7), digits = 0) %>% 
+  flextable::colformat_num(j = 1, big.mark = "", digits = 0) %>% 
+  flextable:: bold(part = "header")
+```
+
+### FY21 Scheduled and Actual Amount
+
+```{r}
+payments_fy21 %>%
+  summarize(across(c(scheduled_amount, actual_amount), sum, na.rm = TRUE))
+```
+
+```{r}
+# payments_fy21 %>% 
+#   write_xlsx("payments_fy21.xlsx")
+```
+
+### Graph Current FY Payment
+
+```{r}
+payments_processed %>% 
+  filter(fiscal_year == 2021) %>% 
+  mutate(payment_done = ifelse(actual_amount > 0,  "yes", "no")) %>% 
+    ggplot(aes(scheduled_payment_date, friendly_name, fill = payment_done, size = as.factor(fdn_cat), label = paste0(scales::dollar(scheduled_amount),sep = "\n",  friendly_name, sep = "|", (scheduled_payment_date) )))+
+  geom_label(size = 3.5, color = "white")  +
+  scale_x_date(limits = as.Date(c('2020-8-30', '2021-08-31')), date_breaks = "month", date_labels = "%b-%y", position =  "bottom") + 
+  theme_grey() +
+  theme(axis.text.y = element_blank()) +
+  theme(axis.ticks.y = element_blank()) + 
+  theme(axis.title.y = element_blank()) +
+   guides(fill = guide_legend(title = "Payment_Done", title.position = "top",
+                              
+  override.aes = aes(label = ""))) + 
+  # scale_fill_discrete(name = "Payment_Done", labels = c("Yes", "No")) +
+  scale_fill_viridis_d(name = "Payment_Done", labels = c("Yes", "No"), alpha = 0.8)
+  # geom_text_repel() +
+  # geom_text(aes(label = scales::dollar(scheduled_amount)))
+```
+
+```{r}
+# pay_period <- payments_processed %>% 
+#   filter(fiscal_year == 2020) %>% 
+#   rename(date = scheduled_payment_date) %>% 
+#   cross_by_periods(c("month", "quarter", "year")) %>% 
+#   summarize(payment = sum(scheduled_amount))
+```
+
+```{r}
+# pay_period %>%
+#   ggplot(aes(date, payment, color = period)) + 
+#   geom_line(size = 1, alpha = 0.5) + 
+#   scale_y_continuous(labels = dollar_format()) +
+#   expand_limits(y = 0)
+```
+
+```{r}
+# payments_processed %>%
+#   drop_na(friendly_name) %>% 
+#   mutate(friendly_name = stringr::str_trunc(friendly_name, width = 20, side = "left"))
+
+
+
+
+# %>% 
+#     filter(fiscal_year == 2020) %>% 
+#   ggplot() +
+#   geom_text_repel(aes(x = scheduled_payment_date, y= friendly_name,label = scheduled_amount)) 
+#  
+  
+```
+
+### Next FY Payment Details
+
+```{r}
+
+payments_fy22 <- payments_processed %>%
+  filter(fiscal_year == 2022)%>%
+  select(
+    fiscal_year,
+    friendly_name,
+    grant_status,
+    scheduled_payment_date,
+    scheduled_amount,
+    actual_payment_date,
+    actual_amount
+  ) %>%
+  arrange(scheduled_payment_date) 
+payments_fy22 %>% 
+  filter(!grant_status%in%c("New", "In Progress"), 
+         !friendly_name %in% c("Fundaula Book Royalty Grant")) %>% 
+  
+  # knitr::kable()
+  flextable::flextable() %>% 
+  flextable::border_inner() %>% 
+  flextable::border_outer() %>% 
+  flextable::colformat_num(j = c(5,7), digits = 0) %>% 
+  flextable::colformat_num(j = 1, big.mark = "", digits = 0) %>% 
+  flextable:: bold(part = "header")
+```
+
+### FY22 Scheduled and Actual Amount
+
+```{r}
+payments_fy22 %>%
+      summarize(across(c(scheduled_amount, actual_amount), sum, na.rm = TRUE))
+```
+
+### Friendly Names
+
+```{r}
+payments_processed %>% 
+  count(friendly_name)
+
+```
+
+### All Payments related to a particular grant
+
+```{r}
+payments_processed %>%
+  filter(friendly_name == "WEA 6/ Good Return 1") %>%
+  select(
+    fiscal_year,
+    friendly_name,
+    grant_status,
+    scheduled_payment_date,
+    scheduled_amount,
+    actual_payment_date,
+    actual_amount
+  ) %>%
+  arrange(scheduled_payment_date) %>%
+  # knitr::kable()
+  flextable::flextable() %>% 
+  flextable::border_inner() %>% 
+  flextable::border_outer() %>% 
+  flextable::colformat_num(j = c(5,7), digits = 0) %>% 
+  flextable::colformat_num(j = 1, big.mark = "", digits = 0) %>% 
+  flextable:: bold(part = "header")
+  
+```
+
+### New section check for moonreader

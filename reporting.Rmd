@@ -1,0 +1,285 @@
+---
+title: "Reporting"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_document
+  
+theme: flatly
+toc: yes
+toc_float: yes
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE, 
+  message = FALSE, 
+  echo = FALSE
+)
+
+# word_document: 
+#     reference_docx: reporting_template.docx
+```
+
+```{r}
+
+
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(writexl)
+library(flextable)
+library(ggrepel)
+library(knitr)
+library(xaringan)
+library(DT)
+library(here)
+
+```
+
+## Reporting related to global giving grants
+
+[**Grantee Reports Link**](https://impactaccenture.lightning.force.com/lightning/r/Report/00O1I000006hoZ7UAI/view)
+
+```{r, results = 'hide'}
+# Reading the .xlsx file
+# reporting <- readxl::read_xlsx("reporting_up.xlsx") %>%
+#   clean_names() 
+
+reporting <- read_csv( "grantee_reports.csv") %>%
+  clean_names()
+
+```
+
+```{r, results = 'hide'}
+glimpse(reporting)
+names(reporting)
+```
+
+## Checking number of reporting associated with grant status
+
+```{r}
+
+# reporting %>%
+#   count(grant_status, name = "total_no_of_reports") %>% 
+#   flextable::flextable() %>%
+#   flextable::border_inner() %>%
+#   flextable::border_outer() %>%
+#   flextable::colformat_num(j = 2, digits = 0, big.mark = "") %>%
+#   flextable::bold(part = "header") %>% 
+#   flextable::bg(bg = "#7E00FF", part = "header") %>% 
+#   flextable::color(color = "white", part = "header") %>% 
+#   flextable::bg(bg = "#ECE7FF", part = "body") %>%  
+#   flextable::font(fontname = "Century Gothic") %>% 
+#   flextable::font(fontname = "Century Gothic", part = "header") %>% 
+#   flextable::width(j = 1:2, width = c(1.498940, 1.578462)) %>% 
+#   flextable::height(i = 1:5, height = c(0.3294587,  0.3004399,  0.3315475,  0.3294587,  0.3315475))
+
+
+
+```
+
+```{r results = 'hide'}
+reporting_processed <- reporting %>%
+  mutate(
+    due_date = mdy(due_date),
+    due_month = month(due_date),
+    due_year = year(due_date),
+    due_adjustment = as.integer(due_month >= 9),
+    due_fiscal_year = due_year + due_adjustment,
+    submission_date = mdy(submission_date),
+    submission_month = month(submission_date),
+    submission_year = year(submission_date),
+    submission_adjustment =  as.integer(submission_month >= 9),
+    submission_fiscal_year = submission_year + submission_adjustment
+  )
+reporting_processed 
+```
+
+## FY15 and later FYs reporting details
+
+```{r echo = FALSE, results = 'asis'}
+# Summary of upcoming reporting/current year reporting
+report_all<- reporting_processed %>% 
+  filter(due_fiscal_year >= 2015) %>% 
+  select(
+    grant_friendly_name,
+    grant_status,
+    due_date,
+    submission_date,
+    due_fiscal_year,
+    submission_fiscal_year,
+    	
+reporting_period,
+stakeholder_call_review_date
+
+  ) %>%
+  arrange(due_date) %>% 
+  DT::datatable(filter = "top", extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download')
+      )
+  )
+  )
+
+report_all
+# knitr::kable(report_fy21)
+
+# flextable::flextable(report_fy21) %>% 
+#   flextable::autofit()
+```
+
+```{r}
+# report_fy21 %>% 
+#   write_xlsx("report_21.xlsx")
+```
+
+## Graph FY21 reporting
+
+```{r fig.width = 10, fig.height = 6}
+library(plotly)
+g <- reporting_processed %>%
+  filter(due_fiscal_year == 2021) %>% 
+  ggplot(aes(due_date, grant_friendly_name, label = paste0( as.character(due_date), sep = "  |  ", grant_friendly_name), fill = status)) +
+  geom_label(size = 3) +
+  # geom_text_repel(family = "Times New Roman", size = 3, color = "firebrick", min.segment.length = 0) +
+  scale_x_date(limits = as.Date(c('2020-8-30', '2021-12-30')), date_breaks = "month", date_labels = "%b-%y", position =  "bottom") + 
+  theme_grey() +
+  
+  # for full month and year name we need to use "%B-%Y)
+  labs(x = "Due date of reporting", 
+       y = "Grant friendly name", 
+       title ="GG grants reporting in FY21", 
+       subtitle = "i.e. from 1 September 2020 to 31 August 2021") +
+  theme(axis.text.y = element_blank(), 
+        axis.title.y = element_blank(), 
+        axis.ticks.y = element_blank()) +
+  guides(fill = guide_legend(title = "Report_Status", title.position = "top", 
+                             override.aes = aes(label = "")))  
+# geom_text(aes(label= due_date), size = 3, color = "firebrick") 
+ggplotly(g)
+```
+
+## FY21 Reportings
+
+```{r}
+f21_reporting <- reporting_processed %>%
+  filter(due_fiscal_year == 2021) %>%
+  select(
+    grant_friendly_name,
+    grant_status,
+    due_date,
+    submission_date,
+    due_fiscal_year,
+    submission_fiscal_year
+  ) %>%
+  arrange(due_date) %>% 
+  DT::datatable(filter = "top", extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download')
+      )
+  )
+  )
+
+f21_reporting
+```
+
+## FY21 YTD report submission details
+
+```{r}
+reporting_processed %>%
+  filter(submission_fiscal_year == 2021) %>%
+  select(
+    grant_friendly_name,
+    grant_status,
+    due_date,
+    submission_date,
+    due_fiscal_year,
+    submission_fiscal_year
+  ) %>%
+  arrange(due_date) %>% 
+  flextable::flextable() %>% 
+  flextable::colformat_num(j = c( 5, 6), digits = 0, big.mark = "") %>% 
+  flextable::bold(part = "header") %>% 
+  flextable::bg(bg = "#7E00FF", part = "header") %>% 
+  flextable::color(color = "white", part = "header") %>% 
+  flextable::bg(bg = "#ECE7FF", part = "body") %>%    
+  flextable::font(fontname = "Century Gothic") %>% 
+  flextable::font(fontname = "Century Gothic", part = "header") %>% 
+  flextable::width(j = 1:6, width = c(2.8530522, 1.4989398, 0.9639938, 1.4074074, 1.3463112, 1.8564905))
+# knitr::kable()
+```
+
+## All reporting related to a particular grant
+
+```{r}
+# Summary of upcoming reporting/current year reporting
+reporting_processed %>%
+  filter(grant_friendly_name == "AMF/DQI/DQL FP") %>%
+  select(
+    grant_friendly_name,
+    grant_status,
+    due_date,
+    submission_date,
+    due_fiscal_year,
+    submission_fiscal_year
+  ) %>%
+  arrange(due_date) %>%
+  # knitr::kable()
+  flextable::flextable() %>% 
+  flextable::border_inner() %>% 
+  flextable::border_outer() %>% 
+  # flextable::autofit() %>% 
+  # dim()
+  flextable::width(j = 1:6, width = c(2.8530522, 1.4989398, 0.9639938, 1.4074074, 1.3463112, 1.8564905)) %>% 
+  flextable::colformat_num(j = c( 5, 6), digits = 0, big.mark = "") %>% 
+  flextable::bold(part = "header") %>% 
+  flextable::bg(bg = "#7E00FF", part = "header") %>% 
+  flextable::color(color = "white", part = "header") %>% 
+  flextable::bg(bg = "#ECE7FF", part = "body") %>%    
+  flextable::font(fontname = "Century Gothic") %>% 
+  flextable::font(fontname = "Century Gothic", part = "header")
+
+```
+
+## Ready for closure grant status associated reporting
+
+```{r}
+reporting_processed %>% 
+  filter(grant_status=="Ready for Closure") %>% 
+  select(
+    grant_friendly_name,
+    grant_status,
+    due_date,
+    submission_date,
+    due_fiscal_year,
+    submission_fiscal_year) %>% 
+  
+  flextable::flextable() %>%
+  flextable::border_inner() %>%
+  flextable::border_outer() %>%
+  flextable::width(j = 1:6, width = c(2.8530522, 1.4989398, 0.9639938, 1.4074074, 1.3463112, 1.8564905)) %>%
+  flextable::colformat_num(j = c(5, 6), digits = 0, big.mark = "") %>%
+  flextable::bold(part = "header") %>% 
+  flextable::bg(bg = "#7E00FF", part = "header") %>% 
+  flextable::color(color = "white", part = "header") %>% 
+  flextable::bg(bg = "#ECE7FF", part = "body") %>%   
+  flextable::font(fontname = "Century Gothic") %>% 
+  flextable::font(fontname = "Century Gothic", part = "header") 
+```
+
+Number of Reporting per FY
+
+```{r}
+reporting_processed %>% 
+count(due_fiscal_year)
+  
+  
+```

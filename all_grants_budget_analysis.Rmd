@@ -1,0 +1,274 @@
+---
+title: "Grant Details including budget and country of impact"
+output:
+    html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE,
+                      message = FALSE)
+```
+
+[all_grants] (<https://impactaccenture.lightning.force.com/lightning/r/Report/00O1I000006S7XNUA0/view?queryScope=userFolders>)
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(flextable)
+library(readxl)
+# devtools::install_github("glin/reactable")
+library(reactable)
+
+```
+
+
+# Data: uploading data n All Grants
+# Reading from the updated excel sheet
+
+
+```{r}
+# all_grants <- read_csv("all_grants.csv") %>% 
+#   clean_names() %>% 
+#   mutate(start_date = mdy(start_date), 
+#          end_date = mdy(end_date)) %>% 
+#   filter(grant_status != "Denied") 
+#   
+#   
+# all_grants <- all_grants %>% 
+#   mutate(across(is.character, ~gsub('[^ -~]', '', .)))
+  
+# reference for the gsub code above: https://stackoverflow.com/questions/17291287/how-to-identify-delete-non-utf-8-characters-in-r
+  
+
+  
+  
+  
+# all_grants %>%   
+# reactable::reactable()
+
+
+all_grants <- readxl::read_xlsx("live_grants.xlsx", sheet = "all_grants") %>% 
+  clean_names() %>% 
+  mutate(start_date = as_date(start_date), 
+         end_date = as_date(end_date))
+
+book_royalties_grants <- 
+  c(
+    "ELBA 1",
+    "Fundaula Book Royalty Grant",
+    "FY18/19 Tottenham Hotspur Foundation - Project Orion support", 
+    "FY19  LC Success Coaching - Global", 
+    "Global Pro Bono CoderDojo Growth Partner Alliance", 
+    "Human + Machine Book Royalty Grant", 
+    "UNHCR Emergency Response", 
+    "UNICEF Covid Response", 
+    "WHO COVID Response Solidarity Fund"
+    )
+    
+
+pipe_gg_grants <- c(
+  "UNHCR 1", 
+  "UNHCR 2", 
+  "UNICEF 4 Passport to Earning", 
+  "UNICEF 5 Tech Asset") # where the status is new
+
+other_non_gg_grants <-  
+  "Grantee report portal test"
+  
+
+all_grants %>% 
+  filter(!friendly_name%in%book_royalties_grants) %>% 
+  filter(!friendly_name%in%pipe_gg_grants) %>% 
+filter(friendly_name!="Grantee report portal test") %>% 
+ filter(!grant_status%in%c("Closed", "Denied") 
+        
+#         
+#         
+#   select(organization_name, 
+#          friendly_name,
+#          grant_status, 
+#          funding_foundation,
+#          start_date, 
+#          end_date,
+#          duration_months,
+#          target_cash_amount_amount, 
+#          actual_cash_amount_amount,
+#          impact_location_country,
+#          impact_location_market_unit,
+#          sponsoring_location_country, 
+#          sponsoring_location_market_unit,
+# target_number_connected,
+# target_number_improved,
+# target_number_transformed) 
+  
+
+
+
+
+
+# all_grants_gg %>% 
+#     count(grant_status, friendly_name, sort = T) 
+   
+
+# all_grants_gg %>%
+#  # mutate(across(is.character, as.factor)) %>%
+#   DT::datatable(filter = "top", extensions = 'Buttons', options = list(
+#     dom = 'Bfrtip',
+#     buttons =
+#       list('copy', 'print', list(
+#         extend = 'collection',
+#         buttons = c('csv', 'excel', 'pdf'),
+#         text = 'Download')
+#       )
+#   )
+#   )
+
+ 
+```
+
+
+
+
+### Live Grants
+
+```{r}
+all_grants %>% 
+  filter(grant_status != "Closed") %>% 
+  select(friendly_name, grant_status, start_date, end_date, duration_months, target_cash_amount, actual_cash_amount) %>% 
+  filter(!friendly_name %in% c("FY19 LC Success Coaching - Global", "Fundaula Book Royalty Grant", "Global Pro Bono CoderDojo Growth Partner Alliance", "Human + Machine Book Royalty Grant")) 
+
+
+
+
+
+# filtered Book Royalties n pro bono grant
+```
+
+# IMPACTED COUNTRIES
+
+```{r}
+ all_grants %>% 
+   filter(organization_name  == "FUNDACION ENTRECULTURAS") %>%
+  select(friendly_name, duration_months, target_cash_amount, actual_cash_amount, impact_location_country, start_date, end_date) %>%
+  arrange(friendly_name) %>%
+  separate_rows(impact_location_country, sep = ";", convert = TRUE) 
+ # %>% write_xlsx("fe1-6.xlsx")
+```
+
+## Status type checkout
+
+```{r}
+all_grants %>% 
+  count(grant_status)
+```
+
+```{r}
+all_grants %>% 
+  filter(grant_status%in% c("Launched", "New", "Ready for Closure", "Revision Needed", "Submitted", "Signed", " In Progress")) %>% 
+  select(organization_name, friendly_name, grant_status, start_date, end_date,  impact_location_country, total_pro_bono_amount, everything()) 
+```
+
+filter out grants with status where status if just one or two to check if they need to be icluded in live or pipe
+
+```{r}
+filter_out <- c("Revision Needed", "New", "Ready for Closure", "In Progress" )
+all_grants %>% 
+  filter(grant_status %in% filter_out) %>% 
+  select(grant_status, friendly_name, target_cash_amount)
+```
+
+## book royalties grants check out and filter those as required
+
+## filter_out_for_live
+
+```{r}
+filter_out_for_live_or_pipe <- c("In Progress", "New", "Revision Needed") # always check if we need to add or remove the "Revisoin Needed" status grant in case of change reuqest they need to be included, in case of new grants they dont need to be included. 
+
+
+```
+
+## Live grants
+
+```{r}
+all_grants_minus_pipe <- all_grants %>% 
+  filter(!grant_status%in%filter_out_for_live_or_pipe)
+all_grants_minus_pipe
+pipe_grants <-  all_grants %>% 
+  filter(grant_status%in%filter_out_for_live_or_pipe)
+pipe_grants
+```
+
+### check if the target_cash_amount and actual_cash_amount are equal for grants
+
+```{r}
+all_grants %>% 
+  mutate(target_actual_check = if_else (target_cash_amount == actual_cash_amount, "Same", "Different")) %>%
+  select(friendly_name, target_cash_amount, actual_cash_amount, target_actual_check) %>% 
+  filter(str_detect(friendly_name, "YBI"))
+```
+
+```{r}
+names(all_grants)
+```
+
+```{r}
+# skim(all_grants)
+```
+
+\#\#Organization names \#\#\#\# (Junior Achievement, Conexao and related organization and UNICEF names comes twice for any analysis those need to be combined) \#\#\#\# in the Top 5 Grantee so far by Globabl Giving Cash Grant Value (USD) section i have combined Junior Achievement and Junior Achievemnet Worldwide. \#\#\#\# Also check for other type of organization e.g. CoderDojo
+
+```{r}
+all_grants_minus_pipe %>% 
+  select(organization_name) %>% 
+  arrange(organization_name) %>% 
+  unique() 
+  
+```
+
+\#\#Friendly names
+
+```{r}
+all_grants_minus_pipe %>% 
+  filter(grant_status != "New") %>% 
+  select(friendly_name) %>% 
+  arrange(friendly_name) %>% 
+  unique() 
+```
+
+### A grant record
+
+```{r}
+all_grants %>% 
+  filter(friendly_name == "AMF/DQI/DQL FP")
+```
+
+## Top 5 Grants so far by Global Giving Cash Grant Value (USD)
+
+```{r}
+names <- c("Friendly Name", "Grant Status", "Start Date", "End Date", "No. of Years", "Global Giving Cash Amount(GG Cash in USD)")
+all_grants_minus_pipe %>% 
+  mutate(target_cash_amount = as.double(target_cash_amount), 
+         actual_cash_amount = as.double(actual_cash_amount)) %>% 
+  group_by(friendly_name) %>% 
+  arrange(desc(target_cash_amount)) %>% 
+  head(5) %>%
+  rowwise() %>% 
+  mutate(no_of_years = round(interval(start_date, end_date)/years(1), 0)) %>% 
+  select(friendly_name, grant_status,  start_date, end_date, no_of_years, target_cash_amount ) %>% 
+  purrr:: set_names(names) %>% 
+  flextable::flextable() %>% 
+  flextable::colformat_num(j = c(5,6), digits = 0) %>% 
+  flextable::border_inner() %>% 
+  flextable:: border_outer() %>% 
+  flextable::bold(part = "header") %>% 
+  flextable::width( j = c(3, 4, 6), width = c(1, 1, 1.3)) %>% 
+  flextable:: bg(bg = "#7E00FF", part = "header") %>% 
+  flextable::bg(bg = "#ECE7FF") %>% 
+  flextable:: color(color = "white", part = "header")
+
+
+```
+
+## Top 5 Grantee so far by Globabl Giving Cash Grant Value (USD)
