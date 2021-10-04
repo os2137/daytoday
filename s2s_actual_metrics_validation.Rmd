@@ -6,8 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, 
-                      cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
@@ -941,6 +940,17 @@ country_gender_grant
 
 ### Grant	FY	Country		
 
+
+```{r}
+grant_fy_country <- actual %>% 
+  select(contains("total"), benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
+  group_by(benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+grant_fy_country
+
+# grant_fy_country %>% 
+#   writexl::write_xlsx("grant_fy_country.xlsx")
+```
 
 ### Grant	FY	Gender		
 

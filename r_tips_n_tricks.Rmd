@@ -3724,6 +3724,26 @@ https://community.rstudio.com/t/github-authentication-from-rstudio-cloud-after-a
 
 ## Useful git pre-commit hooks for R
 https://cran.r-project.org/web/packages/precommit/readme/README.html
-
-
+to solve the issue i used the followings: 
+ reticulate::install_miniconda()
+ precommit::install_precommit()
+ precommit::use_precommit()
+ but this crated some problem which after a lot of trial and error was solved by the following line of code in the terminal whcih seems to have fixed the file path
+ 
+ git config --global core.hooksPath '~/.githooks'
+ refeence link for this: https://stackoverflow.com/questions/20609816/git-pre-commit-hook-not-running-on-windows/31872301
+ 
+ Useful video for using library(usethis) function to set up of file
+ Personal Access Token under the rprofile
+ 
+ ?use_github
+ has links to set up pat link which we can also find on google search
+ edit_r_environ()
+ then use
+ use_github(protocol = "https", auth_token = sys.getenv("GITHUB_PAT"))
+ where GITHUB_PAT is the name of the variable under which PAT has been saved using edit_r_environ()
+ https://www.youtube.com/watch?v=kL6L2MNqPHg
+ 
+ 
+ 
 https://www.dev2qa.com/how-to-fix-importerror-dll-load-failed-while-importing-_sqlite3-the-specified-module-could-not-be-found/
