@@ -1,0 +1,95 @@
+---
+title: "color_your_ggplot_beautiful_rladies_freeburg"
+author: "Onkar Singh"
+date: "10/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+[youtube link](https://www.youtube.com/watch?v=A4fP31h4roU&t=4189s)
+
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+```
+
+
+```{r}
+penguins <- palmerpenguins::penguins %>% drop_na()
+```
+
+## Basic Plots
+1. penguins_flipper: scatterplot
+```{r}
+(penguins_flipper <- ggplot(penguins) + 
+  aes(x = flipper_length_mm, y = body_mass_g) +
+  geom_point(show.legend = FALSE) + 
+  labs(x = "Flipper length", 
+       y = "Body mass", 
+       title = "Palmer pegnuins flipper length and body mass") +
+  theme_minimal())
+```
+
+2. penguins_bill: scatterplot with trend line
+
+```{r}
+(penguins_bill <- ggplot(penguins) + 
+  aes(x = bill_length_mm, y = bill_depth_mm) + 
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  labs( x = "Bill length", 
+        y = "Bill depth", 
+        title = "Palmer penguins bill length and depth") + 
+  theme_minimal())
+```
+
+3. penguins_island: bar chart
+
+```{r}
+
+(penguins_island <- penguins %>% 
+  filter(island != " Torgersen")%>% # removing this island since it has only one species
+  ggplot() + 
+  aes(x = island) + 
+  geom_bar(position = "dodge") + # This will be helpful later
+  labs( x = "Island", 
+        y = "n", 
+        title = "Palmer penguins by island") + 
+  theme_minimal())
+
+  
+  ggplot(penguins) +
+  aes(x = )
+```
+
+
+## Colors in ggplot 2
+
+- color for small areas like dots and lines
+- fill for larger areas
+
+-Mapping to columns that already exists in aes: adds color
+- Mapping to colums not yet displayed in the graph: add information/can seemingly change the behavior of geoms
+
+Note that you can add to the aes of the plot that is saved  as a variable
+
+```{r}
+(penguins_island  + 
+  aes(fill =  island))
+
+(penguins_island + 
+    aes(fill = species) + 
+    geom_bar(position = "dodge"))
+```
+
+
+```{r}
+(penguins_flipper <- penguins_flipper + 
+   aes(color = body_mass_g)
+ )
+```
+

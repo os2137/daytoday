@@ -1,0 +1,270 @@
+---
+title: "Reactable table of GG portfolio"
+output:
+  html_document:
+    rmdformats::robobook
+---
+
+
+
+```{r , include = FALSE}
+library(tidyverse)
+library(reactable)
+library(lubridate)
+library(scales)
+
+
+
+
+
+```
+
+
+
+
+
+
+Reactable Grouping and Aggregation
+You can group rows in a table by specifying one or more columns in groupBy:
+
+## S2S by Grant Country FY
+```{r}
+grant_fy_country <- readxl::read_excel("grant_fy_country.xlsx")
+
+new_names <- c("Grant", "FY", "Country", "Connected_Actual", "Improved_Actual", "Transformed_Actual")
+
+grant_fy_country <- grant_fy_country %>% 
+  set_names(new_names)
+
+reactable(grant_fy_country, groupBy = c("Grant", "Country"))
+```
+## S2S Grant Country Summary FY
+```{r}
+reactable(
+  grant_fy_country,
+  groupBy = c("Grant", "FY"),
+  columns = list(
+   Country = colDef(aggregate = "unique"),
+    Connected_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE)), 
+    Improved_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE)),
+    Transformed_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE))
+   ),
+  bordered = TRUE
+)
+```
+
+## S2S per FY per Grant
+```{r}
+fy_grant<- grant_fy_country %>% group_by(FY, Grant) %>% 
+            summarise(across(where(is.numeric), sum, na.rm = T))
+
+reactable(fy_grant,
+
+groupBy = c("FY", "Grant"),
+  columns = list(
+   Grant = colDef(aggregate = "unique"),
+    Connected_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE)), 
+    Improved_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE)),
+    Transformed_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE))
+   ),
+  bordered = TRUE
+)
+```
+
+## S2S Grant FY
+```{r}
+grant_fy <- grant_fy_country %>% group_by( Grant, FY) %>% 
+            summarise(across(where(is.numeric), sum, na.rm = T))
+
+reactable(grant_fy, groupBy = c("Grant", "FY"), 
+           columns = list(
+   FY = colDef(aggregate = "unique"),
+    Connected_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE)), 
+    Improved_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE)),
+    Transformed_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE))
+   ),
+  bordered = TRUE
+)
+    
+names(gg_grants)      
+```
+
+
+## Grant Details to be included
+friendly name, funding foundaton, start_date, end_date, grant amount target, grant amount actual
+
+```{r}
+gg_grants <- readxl::read_excel("live_grants.xlsx", sheet = "all_grants") %>% 
+  janitor::clean_names() %>% 
+  mutate(start_date = as_date(start_date), 
+         end_date = as_date(end_date)) %>% 
+  select(friendly_name, funding_foundation, grant_status, start_date, end_date, target_cash_amount_amount,  actual_cash_amount_amount, impact_location_country,impact_location_market_unit,sponsoring_location_country, 
+         sponsoring_location_market_unit)
+```
+
+```{r}
+reactable(gg_grants %>% filter (grant_status != "Closed"))
+```
+
+
+## Payments by Grant
+
+https://themockup.blog/posts/2020-11-29-bullet-chart-variants-in-r/
+
+https://learnr.wordpress.com/2009/04/23/ggplot2-budget-vs-actual-performance/
+
+## Grant Total and Actual Disbrusement So far
+```{r}
+payment <-
+  readxl::read_excel("live_grants.xlsx", sheet = "payments") %>%
+  janitor::clean_names() %>%
+  filter(
+    type_of_payment == "Cash",
+    funding_foundation != "-",
+    !grant_status %in% c("New", "In Progress", "Closed")
+  ) %>%
+  mutate(
+    scheduled_payment_date = lubridate::as_date(scheduled_payment_date),
+    actual_payment_date = lubridate::as_date(actual_payment_date)
+  ) %>%
+  mutate(
+    due_date_month_scheduled = month(scheduled_payment_date),
+    due_date_year_scheduled = year(scheduled_payment_date),
+    adjustment = as.integer(due_date_month_scheduled >= 9),
+    fiscal_year_scheduled = due_date_year_scheduled + adjustment,
+    due_date_month_actual = month(actual_payment_date),
+    due_date_year_actual = year(actual_payment_date),
+    adjustment = as.integer(due_date_month_actual >= 9),
+    fiscal_year_actual = due_date_year_actual + adjustment
+  ) %>% 
+select(
+    friendly_name, funding_foundation, scheduled_amount_amount, actual_amount_amount, scheduled_payment_date, actual_payment_date, fiscal_year_scheduled, fiscal_year_actual
+  )
+```
+
+
+```{r}
+payment_by_grant <- payment%>% 
+  group_by(friendly_name) %>% 
+  summarize(across(scheduled_amount_amount:actual_amount_amount, .fns = sum, na.rm =T))
+  
+g <- payment_by_grant %>% 
+  pivot_longer(!friendly_name, names_to = "type", 
+               values_to = "amount_usd") %>% 
+  mutate(friendly_name = fct_reorder(friendly_name, amount_usd)) %>% 
+  ggplot(aes( amount_usd, friendly_name, fill = type)) + 
+  geom_col(position = "dodge") +
+  scale_x_continuous(labels = dollar_format()) +
+  theme(legend.position = "none") + 
+  labs(x = "Grant amount vs. total payment(USD) YTD", 
+       y = " GG grants friendly name", 
+       title = "Global Giving live grants", 
+       subtitle = "Grant amount vs. total disbrusement YTD")
+
+
+plotly::ggplotly(g)
+  
+   
+
+```
+
+
+## Payment Scheduled vs Actual Payment  by Fiscal Year
+Use filter by friendly_name, scheduled_payment_date, actual_payment_date etc e.g. to see what is the in year payemnt scheudled and actual for each grant, which are the payments already concluded and most importantly which ones are the upcomig payments. 
+
+```{r}
+payment %>% 
+  group_by(friendly_name, fiscal_year_scheduled, fiscal_year_actual, scheduled_payment_date, actual_payment_date) %>% 
+  summarize(across(scheduled_amount_amount:actual_amount_amount, fns = sum, na.rm = T)) %>% 
+    reactable(groupBy = "fiscal_year_scheduled")
+  
+```
+
+
+## Payment FY total, per Foundation Total, per Grant Total 
+```{r}
+reactable(
+  payment, 
+  groupBy = c( "fiscal_year_scheduled", "funding_foundation", "friendly_name", "scheduled_payment_date", "actual_payment_date", "fiscal_year_actual"),
+  columns = list(
+    funding_foundation = colDef(aggregate = "unique"),
+    # friendly_name = colDef(aggregate = "count"), this step is not useful and since only one option is avaialble better to go for aggregate = uniue which seems quite useful. 
+  
+   friendly_name = colDef(aggregate = "unique"),
+    scheduled_amount_amount = colDef(aggregate = "sum", format = colFormat(separators = TRUE)), 
+    actual_amount_amount = colDef(aggregate = "sum", format = colFormat(separators = TRUE))
+    
+   ),
+  bordered = TRUE
+)
+```
+
+
+
+```{r}
+reactable(
+  payment, 
+  groupBy = c( "fiscal_year_scheduled", "funding_foundation", "friendly_name", "scheduled_payment_date", "actual_payment_date", "fiscal_year_actual"),
+  columns = list(
+    funding_foundation = colDef(aggregate = "unique"),
+   scheduled_amount_amount = colDef(aggregate = "sum", format = colFormat(separators = TRUE)), 
+    actual_amount_amount = colDef(aggregate = "sum", format = colFormat(separators = TRUE))
+    
+   ),
+  bordered = TRUE
+)
+```
+
+## Report by Grants
+
+```{r}
+reporting <- readxl::read_excel("live_grants.xlsx", sheet = "reporting") %>% janitor::clean_names() %>% 
+  filter(!grant_status %in% c("Closed", "In Progress")) %>% 
+  
+  mutate(due_date = as_date(due_date),
+           submission_date = as_date(submission_date),
+           stakeholder_call_review_date = as_date(stakeholder_call_review_date)) %>% 
+  mutate(due_date_month = month(due_date), 
+         submission_date_month = month(submission_date), 
+         stakholder_call_review_date_month = month(stakeholder_call_review_date), 
+         due_date_year = year(due_date), 
+         submission_date_year = year(submission_date), 
+         stakeholder_call_review_date_year = year(stakeholder_call_review_date), 
+         due_date_adjustment = as.integer(due_date_month >= 9), 
+         submission_date_adjustment = as.integer(submission_date_month >=9), 
+         stakeholder_call_review_date_adjustment = 
+           as.integer(stakholder_call_review_date_month >=9),  
+         due_date_fy = due_date_year + due_date_adjustment, 
+        submission_date_fy = submission_date_year +  submission_date_adjustment, 
+        stakeholder_call_review_date_fy = stakeholder_call_review_date_year + stakeholder_call_review_date_adjustment) %>% 
+  
+  select(grant_friendly_name,reporting_period, grantee_report_record_type, 	
+scope, due_date, submission_date, stakeholder_call_review_date, due_date_fy, submission_date_fy, stakeholder_call_review_date_fy, due_date_month, submission_date_month, stakholder_call_review_date_month)
+
+```
+
+```{r}
+reporting %>% 
+  count(grant_friendly_name, due_date, due_date_fy, submission_date, submission_date_fy) %>% 
+  select(-n) %>% 
+  reactable( groupBy = "grant_friendly_name")
+             
+  
+  
+```
+
+
+## Report by Fiscal Year
+
+```{r}
+reactable(reporting %>% arrange(due_date), 
+             groupBy = "due_date_fy")
+ 
+    # friendly_name = colDef(aggregate = "count"), this step is not useful and since only one option is avaialble better to go for aggregate = uniue which seems quite useful. 
+   # 
+   # "grant_friendly_name",  "due_date", "submission_date", "submission_date_fy","reporting_period", "reporting_period","stakeholder_call_review_date"),
+   
+  # bordered = TRUE
+
+```
+

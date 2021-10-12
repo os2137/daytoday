@@ -1,0 +1,181 @@
+---
+title: "shared_grant_data"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::robobook
+---
+
+[Using crosstalk with DT in R Markdown](https://www.gerkelab.com/blog/2021/09/crosstalk-with-dt/)
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  fig.retina = 3
+)
+
+library(tidyverse)
+library(lubridate)
+library(DT)
+library(crosstalk)
+library(janitor)
+library(readxl)
+```
+
+
+
+```{r, include = FALSE}
+all_grants <- read_excel("live_grants.xlsx", sheet = "all_grants") %>% 
+  clean_names() %>% 
+  mutate(start_date = as_date(start_date), 
+         end_date = as_date(end_date)) %>% 
+  select(friendly_name:impact_location_country)
+
+all_grants 
+```
+
+
+
+```{r , include = FALSE}
+payment <- readxl::read_excel("live_grants.xlsx", sheet = "payments") %>% 
+  clean_names() %>% 
+  filter(grant_status != "Closed") %>% 
+  mutate(scheduled_payment_date = as_date(scheduled_payment_date), 
+         actual_payment_date = as_date(actual_payment_date)) %>% 
+  select(friendly_name, scheduled_amount_amount, actual_amount_amount, scheduled_payment_date, actual_payment_date, scheduled_fy, actual_fy )
+
+payment 
+```
+
+
+```{r, include = FALSE}
+reporting <-
+  readxl::read_excel("live_grants.xlsx", sheet = "reporting") %>%
+  janitor::clean_names() %>%
+  mutate(due_date = as_date(due_date),
+         submission_date = as_date(submission_date)) %>%
+  select(
+    grant_friendly_name,
+    scope,
+    due_date,
+    submission_date,
+    stakeholder_call_review_date,
+    due_fiscal_year,
+    submission_fiscal_year
+  )
+
+# reporting
+
+
+```
+
+
+```{r , include = FALSE}
+s2s_actual <-
+  readxl::read_xlsx("live_grants.xlsx", sheet = "s2s_actuals") %>%
+  clean_names() %>%
+  mutate(report_date = as_date(report_date))
+
+
+processed_actual <- s2s_actual %>%
+  mutate(
+    report_date = ymd(report_date),
+    report_month = month(report_date),
+    report_year = year(report_date),
+    adjustment = ifelse(report_month >= 9, 1, 0),
+    report_fiscal = report_year + adjustment,
+    report_fiscal = as.factor(report_fiscal)
+  )
+
+actual <- processed_actual %>%
+  select(
+    benchmark_grant_friendly_name,
+    actual_number_reached:total_actual_number_transformed,
+    report_fiscal,
+    benchmark_beneficiary_country_location
+  )
+
+grant_fy_country <- actual %>%
+  select(
+    contains("total"),
+    benchmark_grant_friendly_name,
+    report_fiscal,
+    benchmark_beneficiary_country_location
+  ) %>%
+  group_by(
+    benchmark_grant_friendly_name,
+    report_fiscal,
+    benchmark_beneficiary_country_location
+  ) %>%
+  summarise(across(where(is.numeric), sum, na.rm = T))
+# grant_fy_country
+
+```
+
+
+```{r , include=FALSE}
+# set up a group of SharedData objects
+shared_grants <-
+  SharedData$new(all_grants, key = ~ friendly_name, group = "shared_obj")
+shared_payment <-
+  SharedData$new(payment, key = ~ friendly_name, group = "shared_obj")
+# shared_reporting <-
+#   SharedData$new(reporting,
+#                  key = ~ grant_friendly_name,
+#                  group = "shared_obj")
+# 
+# shared_s2sactual <- SharedData$new(grant_fy_country,
+#                                    key = ~
+#                                      benchmark_grant_friendly_name,
+#                                    group = "shared_obj")
+
+
+
+```
+
+
+```{r fiendly_name_filter}
+filter_select(
+  id = "friendly_name",
+  label = "Friendly_Name",
+  sharedData = shared_grants,
+  group = ~friendly_name
+)
+```
+
+
+## Grant Details
+```{r}
+datatable(all_grants)
+
+```
+
+
+## Payment 
+
+```{r}
+datatable(payment)
+
+```
+
+<!-- ## Reporting -->
+
+<!-- ```{r} -->
+<!-- dt_reporting <- datatable(reporting) -->
+<!-- dt_reporting -->
+<!-- ``` -->
+
+
+<!-- ## S2S_Actuals -->
+
+<!-- ```{r} -->
+<!-- dt_grant_fy_country <- datatable(grant_fy_country) -->
+
+<!-- dt_grant_fy_country -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- bscols(dt_grants, dt_payments, dt_reporting) -->
+<!-- ``` -->
+

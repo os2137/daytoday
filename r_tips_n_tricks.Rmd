@@ -32,7 +32,18 @@ Best keyboard shortcut I need to use daily
 # Alt + Shift +K to see all the shortcuts
 ```
 
-## keyboard shortcut in RStudio that changed your life
+### to view an object in Rstudio
+
+**Control + Click** and it directly displays the full data view no need to do View(data)
+
+https://twitter.com/rstudiotips/status/1422247399217504283
+
+### to change an object in scope all at once 
+e.g. when we select a data object all other entries with same name gets greyed as well. We can can chang it with Ctrl+Shift+Alt +M
+
+https://twitter.com/OscarBaruffa/status/1424253380231376897
+
+### keyboard shortcut in RStudio that changed your life
 
 [Rstudio key board shortcut that changed your
 life](https://twitter.com/kc_analytics/status/1378770803454529538)
@@ -186,7 +197,7 @@ life](https://twitter.com/kc_analytics/status/1378770803454529538)
     [\#ggplot](https://twitter.com/hashtag/ggplot?src=hashtag_click)
     layers
 
--   rl + A (select all) followed by Ctrl + Shift + A (format selected
+-   Ctrl + A (select all) followed by Ctrl + Shift + A (format selected
     code).
 
     Quick and dirty code styling, made my life much better!
@@ -232,9 +243,9 @@ life](https://twitter.com/kc_analytics/status/1378770803454529538)
 -   Ctrl + Alt + F: keyword search in whole folder Ctrl + Alt + L:
     pkgload::load_all() Ctrl + Alt + T: devtools::test()
 
-    \
+  
 
-## Getting all the functions in a package
+### Getting all the functions in a package
 
 ```{r}
 #RStats Need to use a function from a package but unsure / have a vague recollection of its name? 
@@ -3114,6 +3125,9 @@ mtcars %>%
 will test across all columns of mtcars whether the column has a mean
 greater than 20.
 
+
+# Packages
+
 ## STRINGR_stringr
 
 extracting word from a string
@@ -3132,9 +3146,20 @@ woke_strings
 
 ```
 
-# GGPLOT2\|ggplot2
+
+## regexplain
+https://www.garrickadenbuie.com/project/regexplain/
+
+devtools::install_github("gadenbuie/regexplain")
+
+# GGPLOT2|ggplot2
 
 ## Colors in ggplot2
+
+scale_color_manual for categorical data
+scale_color_gradient
+scale_color_graident2
+
 
 ### coolor.co
 
@@ -3153,9 +3178,9 @@ library(paletteer)
 palettes_d_names(paletteer)
 
 
-{r} palettes_d_names
+palettes_d_names
 
-{r} palettes_c_names
+palettes_c_names
 
 paletteer_d("wesanderson::Darjeeling1")
 
@@ -3191,7 +3216,7 @@ paletteer_d("Redmonder::dPBIPuOr", 14, type = "continuous")
 
 paletteer_c("viridis::inferno", n = 5)
 
-paletteer_d("viridis::inferno", 5)
+paletteer_d("viridis::inferno", n = 3)
 ```
 
 ## Fonts in ggplot 2
@@ -3480,6 +3505,11 @@ extract the information they hold. You can create visualization with
 
 <https://cran.r-project.org/web/packages/esquisse/readme/README.html>
 
+
+# ganttrify package for gantt chart
+
+https://ganttrify.europeandatajournalism.eu/
+
 # Blogdown
 
 ## Rmarkdown/Bookdown
@@ -3604,6 +3634,13 @@ workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/).
 
 use_blank_slate(scope = c("user", "project")) Arguments scope\
 Edit globally for the current user, or locally for the current project
+
+
+## tidyexplain animated joins
+
+https://github.com/gadenbuie/tidyexplain/tree/master/images
+
+
 
 ## Others/General/Non-Categorized
 

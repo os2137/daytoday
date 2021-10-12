@@ -28,7 +28,7 @@ library(janitor)
 library(lubridate)
 library(writexl)
 library(flextable)
-library(ggrepel)
+# library(ggrepel)
 library(knitr)
 library(xaringan)
 library(DT)
@@ -41,19 +41,16 @@ library(here)
 [**Grantee Reports Link**](https://impactaccenture.lightning.force.com/lightning/r/Report/00O1I000006hoZ7UAI/view)
 
 ```{r, results = 'hide'}
-# Reading the .xlsx file
-# reporting <- readxl::read_xlsx("reporting_up.xlsx") %>%
-#   clean_names() 
+# reporting <- read_csv( "grantee_reports.csv") %>%
+#   clean_names()
 
-reporting <- read_csv( "grantee_reports.csv") %>%
-  clean_names()
-
+reporting <- readxl::read_excel("live_grants.xlsx", sheet = "reporting") %>% 
+              janitor::clean_names() %>% 
+              mutate(due_date = lubridate::as_date(due_date), 
+              submission_date = lubridate::as_date(submission_date))
+reporting
 ```
 
-```{r, results = 'hide'}
-glimpse(reporting)
-names(reporting)
-```
 
 ## Checking number of reporting associated with grant status
 

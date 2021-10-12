@@ -44,23 +44,23 @@ library(ggrepel)
 ### Step 1: Reading the file
 
 ```{r}
-# Reading the file
-bookroyaltiesgrants <- c("Fundaula Book Royalty Grant", 
-                         "FY19 LC Success Coaching - Global", "Human + Machine Book Royalty Grant", "ELBA"
-                         )
-payments <- read_csv("gg_payments_scheduled_and_actual.csv") %>%
+# # Reading the file
+# bookroyaltiesgrants <- c("Fundaula Book Royalty Grant", 
+#                          "FY19 LC Success Coaching - Global", "Human + Machine Book Royalty Grant", "ELBA"
+#                          )
+# payments <- read_csv("gg_payments_scheduled_and_actual.csv") %>%
+#   clean_names() %>% 
+#   filter(!friendly_name %in% bookroyaltiesgrants)
+
+payments <- readxl::read_excel("live_grants.xlsx", sheet = "payments") %>% 
   clean_names() %>% 
-  filter(!friendly_name %in% bookroyaltiesgrants)
+  mutate(scheduled_payment_date = as_date(scheduled_payment_date), 
+         actual_payment_date = as_date(actual_payment_date)) %>% 
+  select(friendly_name, scheduled_amount_amount, actual_amount_amount, scheduled_payment_date, actual_payment_date, scheduled_fy, actual_fy )
   
 
 ```
 
-### Grant Statuses
-
-```{r}
-payments %>% 
-  count(grant_status)
-```
 
 ```{r}
 payments <- payments %>% 
