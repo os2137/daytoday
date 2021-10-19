@@ -20,6 +20,21 @@ library(palmerpenguins)
 
 ```{r}
 penguins <- palmerpenguins::penguins %>% drop_na()
+
+
+show_in_excel <- function(.data){
+  if (interactive()) { # avoid unwanted Excel's executions
+    temp <- tempfile(fileext = ".csv") # extension embedded directly
+    readr::write_excel_csv(.data, temp) # add BOM for Excel's pleasure
+    fs::file_show(temp)
+    }
+ .data # so that we can continue piping 
+}
+
+penguins %>% 
+  head(20) %>% 
+  show_in_excel()
+
 ```
 
 ## Basic Plots

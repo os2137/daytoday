@@ -7,15 +7,11 @@ output:
 
 
 
-```{r , include = FALSE}
+```{r , include = FALSE, tidy = TRUE}
 library(tidyverse)
 library(reactable)
 library(lubridate)
 library(scales)
-
-
-
-
 
 ```
 
@@ -29,7 +25,35 @@ You can group rows in a table by specifying one or more columns in groupBy:
 
 ## S2S by Grant Country FY
 ```{r}
-grant_fy_country <- readxl::read_excel("grant_fy_country.xlsx")
+
+s2s_actual <-
+  readxl::read_xlsx("live_grants.xlsx", sheet = "s2s_actuals") %>%
+  janitor::clean_names() %>%
+  mutate(report_date = as_date(report_date))
+
+
+processed_actual <- s2s_actual %>%
+  mutate(report_date = ymd(report_date), 
+ 
+    report_month = month(report_date),
+    report_year = year(report_date),
+    adjustment = ifelse(report_month >= 9, 1, 0),
+    report_fiscal = report_year + adjustment,
+    report_fiscal = as.factor(report_fiscal)
+  ) 
+
+actual <- processed_actual %>% 
+  select(benchmark_grant_friendly_name, actual_number_reached:total_actual_number_transformed, report_fiscal,benchmark_beneficiary_country_location )
+
+
+grant_fy_country <- actual %>% 
+  select(contains("total"), benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
+  group_by(benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+
+
+
+# grant_fy_country <- readxl::read_excel("grant_fy_country.xlsx")
 
 new_names <- c("Grant", "FY", "Country", "Connected_Actual", "Improved_Actual", "Transformed_Actual")
 
@@ -37,6 +61,40 @@ grant_fy_country <- grant_fy_country %>%
   set_names(new_names)
 
 reactable(grant_fy_country, groupBy = c("Grant", "Country"))
+
+
+
+
+s2s_target <-
+  readxl::read_xlsx("live_grants.xlsx", sheet = "s2s_targets") %>%
+  janitor::clean_names() %>%
+  mutate(report_date = as_date(report_date))
+
+
+processed_target <- s2s_target %>%
+  mutate(report_date = ymd(report_date), 
+ 
+    report_month = month(report_date),
+    report_year = year(report_date),
+    adjustment = ifelse(report_month >= 9, 1, 0),
+    report_fiscal = report_year + adjustment,
+    report_fiscal = as.factor(report_fiscal)
+  ) 
+
+target <- processed_target %>% 
+  select(benchmark_grant_friendly_name, target_number_reached:total_target_number_transformed, report_fiscal,benchmark_beneficiary_country_location )
+
+
+grant_fy_country_t <- target %>% 
+  select(contains("total"), benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
+  group_by(benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+
+
+new_names_t <- c("Grant", "FY", "Country", "Connected_t", "Improved_t", "Transformed_t")
+
+grant_fy_country_t <- grant_fy_country_t %>% 
+  set_names(new_names_t)
 ```
 ## S2S Grant Country Summary FY
 ```{r}
@@ -86,7 +144,7 @@ reactable(grant_fy, groupBy = c("Grant", "FY"),
   bordered = TRUE
 )
     
-names(gg_grants)      
+ 
 ```
 
 

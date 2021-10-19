@@ -985,7 +985,9 @@ country_grant_gender
 grant_fy_country <- actual %>% 
   select(contains("total"), benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
   group_by(benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
-  summarise(# grant_fy_country %>%
+  summarise(across(where(is.numeric), sum, na.rm = T))
+    
+# grant_fy_country %>%
 #   writexl::write_xlsx("grant_fy_country.xlsx")
 # 
 # grant_fy_country %>%

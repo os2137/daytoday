@@ -282,7 +282,48 @@ help(package = "pointblank") #enables are data quality reporting and pipeline-ba
 packages](https://github.com/rstudio/gt) [gt package webpage with links
 at the end of other table related packages](https://gt.rstudio.com/)
 
-## Excel to R (Why)
+## Excel to R 
+
+### Show in excel function
+
+```{r}
+show_in_excel <- function(.data){
+  if (interactive()) { # avoid unwanted Excel's executions
+    temp <- tempfile(fileext = ".csv") # extension embedded directly
+    readr::write_excel_csv(.data, temp) # add BOM for Excel's pleasure
+    fs::file_show(temp)
+    }
+ .data # so that we can continue piping 
+}
+
+mtcars %>% 
+  show_in_excel() %>% 
+  dplyr::select(1:2)
+```
+
+### writing xlsx files
+
+
+Although often you can write data to a single CSV file, sometimes you may need to write several datasets to multiple Excel spreadsheets.
+
+The {write_xlsx} function from {writexl} Package provides an easy syntax to do so! Memo
+
+https://docs.ropensci.org/writexl/reference/write_xlsx.html
+
+```{r}
+library(writexl)
+# create an xlsx with multiple named sheets
+
+write_xlsx(
+  x = list(cars_sheet = mtcars, iris_sheet = iris), 
+  path = "multiple_sheets.xlsx"
+)
+
+readxl::read_excel("multiple_sheets.xlsx", sheet = "iris_sheet")
+```
+
+
+### Why excel to R
 
 Can you please tell me what the R equivalent of those excel formulae
 actually are?
