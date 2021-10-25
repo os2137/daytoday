@@ -3555,6 +3555,13 @@ https://ganttrify.europeandatajournalism.eu/
 
 ## Rmarkdown/Bookdown
 
+### Rmarkdown books
+    * [R Markdown: The Definitive Guide](https://bookdown.org/yihui/rmarkdown/)
+    * [RMarkdown for Scientists by Nicholas Tierney](https://rmd4sci.njtierney.com/)
+    * [bookdown: Authoring Books and Technical Documents with R Markdown](https://bookdown.org/yihui/bookdown/)
+    * [Dynamic Documents with R and knitr](https://www.routledge.com/Dynamic-Documents-with-R-and-knitr/Xie/p/book/9781498716963)
+    
+
 ### knitr::stitch
 
 Sometimes you just want to quickly convert the source code from R script

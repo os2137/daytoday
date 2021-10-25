@@ -12,7 +12,20 @@ library(tidyverse)
 library(reactable)
 library(lubridate)
 library(scales)
+options(scipen = 0) # to remove scientific notation of numbers. 
 
+show_in_excel <- function(.data){
+  if (interactive()) { # avoid unwanted Excel's executions
+    temp <- tempfile(fileext = ".csv") # extension embedded directly
+    readr::write_excel_csv(.data, temp) # add BOM for Excel's pleasure
+    fs::file_show(temp)
+    }
+ .data # so that we can continue piping 
+}
+
+mtcars %>% 
+  show_in_excel() %>% 
+  dplyr::select(1:2)
 ```
 
 
@@ -26,6 +39,7 @@ You can group rows in a table by specifying one or more columns in groupBy:
 ## S2S by Grant Country FY
 ```{r}
 
+## Reading S2S Actual Data
 s2s_actual <-
   readxl::read_xlsx("live_grants.xlsx", sheet = "s2s_actuals") %>%
   janitor::clean_names() %>%
@@ -43,28 +57,24 @@ processed_actual <- s2s_actual %>%
   ) 
 
 actual <- processed_actual %>% 
-  select(benchmark_grant_friendly_name, actual_number_reached:total_actual_number_transformed, report_fiscal,benchmark_beneficiary_country_location )
+  select(contains("total"),benchmark_grant_friendly_name,  report_fiscal,benchmark_beneficiary_country_location )
 
 
-grant_fy_country <- actual %>% 
-  select(contains("total"), benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
+grant_fy_country_a <- actual %>% 
   group_by(benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
   summarise(across(where(is.numeric), sum, na.rm = T))
 
 
 
-# grant_fy_country <- readxl::read_excel("grant_fy_country.xlsx")
+
 
 new_names <- c("Grant", "FY", "Country", "Connected_Actual", "Improved_Actual", "Transformed_Actual")
 
-grant_fy_country <- grant_fy_country %>% 
+grant_fy_country_a <- grant_fy_country_a %>% 
   set_names(new_names)
 
-reactable(grant_fy_country, groupBy = c("Grant", "Country"))
 
-
-
-
+# Reading S2S targets data
 s2s_target <-
   readxl::read_xlsx("live_grants.xlsx", sheet = "s2s_targets") %>%
   janitor::clean_names() %>%
@@ -82,12 +92,12 @@ processed_target <- s2s_target %>%
   ) 
 
 target <- processed_target %>% 
-  select(benchmark_grant_friendly_name, target_number_reached:total_target_number_transformed, report_fiscal,benchmark_beneficiary_country_location )
+  select(contains("total"), benchmark_grant_friendly_name,  report_fiscal,benchmark_beneficiary_country_location )
 
+# target_number_reached:total_target_number_transformed,
 
 grant_fy_country_t <- target %>% 
-  select(contains("total"), benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
-  group_by(benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
+   group_by(benchmark_grant_friendly_name, report_fiscal, benchmark_beneficiary_country_location) %>% 
   summarise(across(where(is.numeric), sum, na.rm = T))
 
 
@@ -95,14 +105,26 @@ new_names_t <- c("Grant", "FY", "Country", "Connected_t", "Improved_t", "Transfo
 
 grant_fy_country_t <- grant_fy_country_t %>% 
   set_names(new_names_t)
+
+grant_fy_country_t_a <- grant_fy_country_t %>% 
+  full_join(grant_fy_country_a, by = c("Grant", "FY", "Country")) # also checked left_join, inner_join yeilds same results
+
+
+reactable(grant_fy_country_t_a, groupBy = c("Grant", "Country"))
 ```
+
+
+
 ## S2S Grant Country Summary FY
 ```{r}
 reactable(
-  grant_fy_country,
+  grant_fy_country_t_a,
   groupBy = c("Grant", "FY"),
   columns = list(
    Country = colDef(aggregate = "unique"),
+   Connected_t = colDef(aggregate = "sum", format = colFormat(separators = TRUE)), 
+    Improved_t = colDef(aggregate = "sum", format = colFormat(separators = TRUE)),
+    Transformed_t = colDef(aggregate = "sum", format = colFormat(separators = TRUE)),
     Connected_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE)), 
     Improved_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE)),
     Transformed_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE))
@@ -113,14 +135,17 @@ reactable(
 
 ## S2S per FY per Grant
 ```{r}
-fy_grant<- grant_fy_country %>% group_by(FY, Grant) %>% 
+fy_grant_t_a<- grant_fy_country_t_a %>% group_by(FY, Grant) %>% 
             summarise(across(where(is.numeric), sum, na.rm = T))
 
-reactable(fy_grant,
+reactable(fy_grant_t_a,
 
 groupBy = c("FY", "Grant"),
   columns = list(
    Grant = colDef(aggregate = "unique"),
+    Connected_t = colDef(aggregate = "sum", format = colFormat(separators = TRUE)), 
+    Improved_t = colDef(aggregate = "sum", format = colFormat(separators = TRUE)),
+    Transformed_t = colDef(aggregate = "sum", format = colFormat(separators = TRUE)),
     Connected_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE)), 
     Improved_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE)),
     Transformed_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE))
@@ -131,12 +156,15 @@ groupBy = c("FY", "Grant"),
 
 ## S2S Grant FY
 ```{r}
-grant_fy <- grant_fy_country %>% group_by( Grant, FY) %>% 
+grant_fy_t_a <- grant_fy_country_t_a %>% group_by( Grant, FY) %>% 
             summarise(across(where(is.numeric), sum, na.rm = T))
 
-reactable(grant_fy, groupBy = c("Grant", "FY"), 
+reactable(grant_fy_t_a, groupBy = c("Grant", "FY"), 
            columns = list(
    FY = colDef(aggregate = "unique"),
+   Connected_t = colDef(aggregate = "sum", format = colFormat(separators = TRUE)), 
+    Improved_t = colDef(aggregate = "sum", format = colFormat(separators = TRUE)),
+    Transformed_t = colDef(aggregate = "sum", format = colFormat(separators = TRUE)),
     Connected_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE)), 
     Improved_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE)),
     Transformed_Actual = colDef(aggregate = "sum", format = colFormat(separators = TRUE))
@@ -152,12 +180,28 @@ reactable(grant_fy, groupBy = c("Grant", "FY"),
 friendly name, funding foundaton, start_date, end_date, grant amount target, grant amount actual
 
 ```{r}
-gg_grants <- readxl::read_excel("live_grants.xlsx", sheet = "all_grants") %>% 
-  janitor::clean_names() %>% 
-  mutate(start_date = as_date(start_date), 
-         end_date = as_date(end_date)) %>% 
-  select(friendly_name, funding_foundation, grant_status, start_date, end_date, target_cash_amount_amount,  actual_cash_amount_amount, impact_location_country,impact_location_market_unit,sponsoring_location_country, 
-         sponsoring_location_market_unit)
+gg_grants <-
+  readxl::read_excel("live_grants.xlsx", sheet = "all_grants") %>%
+  janitor::clean_names() %>%
+  mutate(start_date = as_date(start_date),
+         end_date = as_date(end_date)) %>%
+  # filter(organization_name == "NetHope") %>%
+  # show_in_excel()
+  select(
+    organization_name,
+    friendly_name,
+    funding_foundation,
+    grant_status,
+    start_date,
+    end_date,
+    duration_months,
+    target_cash_amount_amount,
+    actual_cash_amount_amount,
+    impact_location_country,
+    impact_location_market_unit,
+    sponsoring_location_country,
+    sponsoring_location_market_unit
+  )
 ```
 
 ```{r}
@@ -171,6 +215,7 @@ https://themockup.blog/posts/2020-11-29-bullet-chart-variants-in-r/
 
 https://learnr.wordpress.com/2009/04/23/ggplot2-budget-vs-actual-performance/
 
+
 ## Grant Total and Actual Disbrusement So far
 ```{r}
 payment <-
@@ -179,7 +224,7 @@ payment <-
   filter(
     type_of_payment == "Cash",
     funding_foundation != "-",
-    !grant_status %in% c("New", "In Progress", "Closed")
+    !grant_status %in% c("New", "In Progress")
   ) %>%
   mutate(
     scheduled_payment_date = lubridate::as_date(scheduled_payment_date),
@@ -198,6 +243,10 @@ payment <-
 select(
     friendly_name, funding_foundation, scheduled_amount_amount, actual_amount_amount, scheduled_payment_date, actual_payment_date, fiscal_year_scheduled, fiscal_year_actual
   )
+# Check if any filtered grant by status needs to be included if yes pls revise the filter in the code above
+# payment %>% 
+#   filter(grant_status %in% c("New", "In Progress")) %>% 
+#   count(friendly_name, sort = T)
 ```
 
 
