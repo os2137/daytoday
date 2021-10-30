@@ -1,0 +1,63 @@
+```
+title: S2S and Budget Report Analysis
+authoer: Onkar Singh
+output: htmel_document
+```
+
+```{r}
+library(tidyverse)
+
+show_in_excel <- function(.data){
+  if (interactive()) { # avoid unwanted Excel's executions
+    temp <- tempfile(fileext = ".csv") # extension embedded directly
+    readr::write_excel_csv(.data, temp) # add BOM for Excel's pleasure
+    fs::file_show(temp)
+    }
+ .data # so that we can continue piping 
+}
+```
+
+
+```{r}
+s2s <- readxl::read_excel("FE6_S2S_Report_20201029.xlsx") %>% 
+  janitor::clean_names()
+
+glimpse(s2s)
+```
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+budget <- readxl::read_excel("FE6_Budget_Report_20201029.xlsx") %>% 
+  janitor::clean_names()
+
+glimpse(budget)
+```
+
+
+```{r}
+budget_actual_per_country <- budget %>% 
+  group_by(country) %>% 
+  summarize(across(c(original_budget:expenditures_to_date), sum, na.rm =T)) %>% 
+  select(country, original_budget, actual_expenditures ) %>% 
+  show_in_excel()
+  
+```
+
+```{r}
+budget_actual_per_category <-  budget %>% 
+  group_by(country, parent_category, category) %>% 
+  summarize(across(c(original_budget:expenditures_to_date), sum, na.rm =T)) %>% 
+  select(country, parent_category, category, original_budget, actual_expenditures ) %>%
+  filter(across(c(original_budget, actual_expenditures), ~.x>0)) %>% 
+  show_in_excel()
+  
+```
+

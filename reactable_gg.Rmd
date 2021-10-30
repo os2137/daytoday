@@ -31,8 +31,6 @@ mtcars %>%
 
 
 
-
-
 Reactable Grouping and Aggregation
 You can group rows in a table by specifying one or more columns in groupBy:
 
