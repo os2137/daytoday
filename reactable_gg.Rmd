@@ -13,6 +13,7 @@ library(reactable)
 library(lubridate)
 library(scales)
 options(scipen = 0) # to remove scientific notation of numbers. 
+library(DT)
 
 show_in_excel <- function(.data){
   if (interactive()) { # avoid unwanted Excel's executions
@@ -31,12 +32,12 @@ mtcars %>%
 
 
 
-Reactable Grouping and Aggregation
+
+## Reactable Grouping and Aggregation
 You can group rows in a table by specifying one or more columns in groupBy:
 
 ## S2S by Grant Country FY
 ```{r}
-
 ## Reading S2S Actual Data
 s2s_actual <-
   readxl::read_xlsx("live_grants.xlsx", sheet = "s2s_actuals") %>%
@@ -173,6 +174,21 @@ reactable(grant_fy_t_a, groupBy = c("Grant", "FY"),
  
 ```
 
+## Agegroup Gender
+
+## Country Gender
+
+
+## FY Gender
+
+## Grant Gender
+
+
+## Country FY Gender
+
+## FY Country Gender
+
+
 
 ## Grant Details to be included
 friendly name, funding foundaton, start_date, end_date, grant amount target, grant amount actual
@@ -207,7 +223,7 @@ reactable(gg_grants %>% filter (grant_status != "Closed"))
 ```
 
 
-## Payments by Grant
+## All grant payments
 
 https://themockup.blog/posts/2020-11-29-bullet-chart-variants-in-r/
 
@@ -240,12 +256,36 @@ payment <-
   ) %>% 
 select(
     friendly_name, funding_foundation, scheduled_amount_amount, actual_amount_amount, scheduled_payment_date, actual_payment_date, fiscal_year_scheduled, fiscal_year_actual
-  )
+) %>% 
+  arrange(friendly_name)
 # Check if any filtered grant by status needs to be included if yes pls revise the filter in the code above
 # payment %>% 
 #   filter(grant_status %in% c("New", "In Progress")) %>% 
 #   count(friendly_name, sort = T)
+
 ```
+
+```{r}
+payment %>% 
+DT::datatable(filter = "top", extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download')
+      )
+  )
+  )
+```
+
+### Filter by Grants or a set of Grants
+```{r}
+payment %>% 
+  filter(friendly_name %in% c( "SAVE 5", "SAVE 7 Next Gen", "SAVE 6 Next Gen")) 
+
+```
+
 
 
 ```{r}
@@ -273,6 +313,18 @@ plotly::ggplotly(g)
 
 ```
 
+## Payment schedule and actual by Grants
+
+
+```{r}
+payment %>% 
+  group_by(friendly_name, fiscal_year_scheduled, fiscal_year_actual, scheduled_payment_date, actual_payment_date) %>% 
+  summarize(across(scheduled_amount_amount:actual_amount_amount, fns = sum, na.rm = T)) %>% 
+  
+  select(friendly_name, scheduled_amount_amount, actual_amount_amount, everything()) %>% 
+  DT::datatable()
+  
+```
 
 ## Payment Scheduled vs Actual Payment  by Fiscal Year
 Use filter by friendly_name, scheduled_payment_date, actual_payment_date etc e.g. to see what is the in year payemnt scheudled and actual for each grant, which are the payments already concluded and most importantly which ones are the upcomig payments. 
@@ -373,3 +425,31 @@ reactable(reporting %>% arrange(due_date),
 
 ```
 
+
+```{r}
+knitr::knit_exit()
+```
+
+
+this is a background work
+
+### Payments where the scheduled date and payment date FYs are different. 
+```{r}
+payment%>% 
+  rowwise() %>% 
+  mutate(scheduled_actual_fiscal_diff = 
+           fiscal_year_actual - fiscal_year_scheduled) %>% 
+  filter(scheduled_actual_fiscal_diff != 0) %>% 
+  show_in_excel()
+```
+
+### Payments where the scheduled amount and actual amount are different. 
+
+```{r}
+payment%>% 
+  rowwise() %>% 
+  mutate(scheduled_actual_amount_diff = 
+           scheduled_amount_amount - actual_amount_amount) %>% 
+  filter(scheduled_actual_amount_diff != 0) %>% 
+  show_in_excel()
+```

@@ -34,14 +34,17 @@ Best keyboard shortcut I need to use daily
 
 ### to view an object in Rstudio
 
-**Control + Click** and it directly displays the full data view no need to do View(data)
+**Control + Click** and it directly displays the full data view no need
+to do View(data)
 
-https://twitter.com/rstudiotips/status/1422247399217504283
+<https://twitter.com/rstudiotips/status/1422247399217504283>
 
-### to change an object in scope all at once 
-e.g. when we select a data object all other entries with same name gets greyed as well. We can can chang it with Ctrl+Shift+Alt +M
+### to change an object in scope all at once
 
-https://twitter.com/OscarBaruffa/status/1424253380231376897
+e.g. when we select a data object all other entries with same name gets
+greyed as well. We can can chang it with Ctrl+Shift+Alt +M
+
+<https://twitter.com/OscarBaruffa/status/1424253380231376897>
 
 ### keyboard shortcut in RStudio that changed your life
 
@@ -95,7 +98,7 @@ life](https://twitter.com/kc_analytics/status/1378770803454529538)
 
 -   Alt + F4
 
--   Ctrl + alt + i when used \*inside\* a code chunk will split it into
+-   Ctrl + Alt+ I when used \*inside\* a code chunk will split it into
     two chunks.
 
 -   place the cursor on (or highlight) the function you're interesting
@@ -108,10 +111,11 @@ life](https://twitter.com/kc_analytics/status/1378770803454529538)
 
 -   cmd+D to delete a line opt+cmd+down to duplicate a line
 
--   I will also add one I just found out: cmd+click to view an object!!!
+-   I will also add one I just found out: Ctrl+click to view an
+    object!!!
 
 -   ctrl + shift + +. Anytime someone's presenting and the audience is
-    asking them to zoom in and they have no idea what menu it's in
+    asking them to zoom in and they have no idea what menu it's in=
 
 -   cmd+q, open terminal \$jupyter-notebook
 
@@ -144,8 +148,11 @@ life](https://twitter.com/kc_analytics/status/1378770803454529538)
 -   Cmd + shift + C to comment and Cmd + shift + O to open/close chunks
     in my code . I now realise it's Cmd + option + O
 
--   Ctrl + shift + m = %\>% Ctrl + shift + c = comment Ctrl + alt + i =
-    code chunk
+-   Ctrl + Shift + M = %>%
+
+-   Ctrl + Shift + C = comment
+
+-   Ctrl + Alt + I = code chunk
 
 -   Cmd+option+shift+W = close all open tabs except for the current one
     (alternately I could stop clicking on objects to look at them but
@@ -164,17 +171,17 @@ life](https://twitter.com/kc_analytics/status/1378770803454529538)
 -   Control shift f10. Restart R, clear all variables in environment.
     Good for a hard reset to sanity check the script.
 
--   Ctrl Shift A to beautify your code
+-   **Ctrl Shift A to beautify your code**
 
 -   Ctrl+Shift+F = search all R scripts (or any kind of file really)
 
--   ctrl 0-9 completely changed the game for me. i'm so grateful i no
-    longer have to click between panes!
+-   **ctrl 0-9 completely changed the game for me. i'm so grateful i no
+    longer have to click between panes!**
 
 -   Ctrl + P to jump to matching parenthese and Ctrl + Shift + Alt + E
     to expand the selection to the matching parenthesis
 
--   CMD/CTRL + A --\> Select All CMD/CTRL + SHIFT + A --\> Formats the
+-   CMD/CTRL + A --> Select All CMD/CTRL + SHIFT + A --> Formats the
     code
 
 -   Alt + O is nice if you use a lot of folding
@@ -185,8 +192,8 @@ life](https://twitter.com/kc_analytics/status/1378770803454529538)
 -   CTRL + Shift + / to easily reflow comments after updating
     documentation... very useful!
 
--   Open quotation marks ' ' + tab . Let's interactive navigation of
-    file/folder, and correctly specifying paths.
+-   **Open quotation marks ' ' + tab . Let's interactive navigation of
+    file/folder, and correctly specifying paths.**
 
 -   Cmd + i +arrow indents code appropriatel (I'm obsessive about it)
 
@@ -194,7 +201,7 @@ life](https://twitter.com/kc_analytics/status/1378770803454529538)
 
 -   On a Mac) Option + up or down arrow to move lines of code up or
     down! V. handy for reordering
-    [\#ggplot](https://twitter.com/hashtag/ggplot?src=hashtag_click)
+    [#ggplot](https://twitter.com/hashtag/ggplot?src=hashtag_click)
     layers
 
 -   Ctrl + A (select all) followed by Ctrl + Shift + A (format selected
@@ -208,7 +215,7 @@ life](https://twitter.com/kc_analytics/status/1378770803454529538)
     use ctrl+shift+v to paste path with reverse slashes
     <https://github.com/sfr/RStudio-Addin-Snippets>
 
--   ctrl + I Auto indent all the crap I wrote
+-   **ctrl + I Auto indent all the crap I wrote**
 
 -   Ctrl + Shift + R to add a tidy section label
 
@@ -219,14 +226,14 @@ life](https://twitter.com/kc_analytics/status/1378770803454529538)
 
 -   alt+o to close allll the sections at once
 
--   Ctrl + . to search files or functions.
+-   **Ctrl + . to search files or functions.**
 
 -   Select next ocurrence, ctrl + d in VSCode but not mapped in RStudio
     by default
 
 -   Ctrl + shift + N for a new R script
 
--   Cursor on a function + F1 -\> opens help page
+-   Cursor on a function + F1 -> opens help page
 
 -   Not unique to rstudio but let's not forget CMD +
 
@@ -243,7 +250,11 @@ life](https://twitter.com/kc_analytics/status/1378770803454529538)
 -   Ctrl + Alt + F: keyword search in whole folder Ctrl + Alt + L:
     pkgload::load_all() Ctrl + Alt + T: devtools::test()
 
-  
+-   To exit early from the knitting process, you may use the function
+    `knitr::knit_exit()` anywhere in the source document (in a code
+    chunk or inline expression). Once `knit_exit()` is called, **knitr**
+    will ignore all the rest of the document and write out the results
+    it has collected so far.
 
 ### Getting all the functions in a package
 
@@ -282,7 +293,7 @@ help(package = "pointblank") #enables are data quality reporting and pipeline-ba
 packages](https://github.com/rstudio/gt) [gt package webpage with links
 at the end of other table related packages](https://gt.rstudio.com/)
 
-## Excel to R 
+## Excel to R
 
 ### Show in excel function
 
@@ -303,12 +314,13 @@ mtcars %>%
 
 ### writing xlsx files
 
+Although often you can write data to a single CSV file, sometimes you
+may need to write several datasets to multiple Excel spreadsheets.
 
-Although often you can write data to a single CSV file, sometimes you may need to write several datasets to multiple Excel spreadsheets.
+The {write_xlsx} function from {writexl} Package provides an easy syntax
+to do so! Memo
 
-The {write_xlsx} function from {writexl} Package provides an easy syntax to do so! Memo
-
-https://docs.ropensci.org/writexl/reference/write_xlsx.html
+<https://docs.ropensci.org/writexl/reference/write_xlsx.html>
 
 ```{r}
 library(writexl)
@@ -321,7 +333,6 @@ write_xlsx(
 
 readxl::read_excel("multiple_sheets.xlsx", sheet = "iris_sheet")
 ```
-
 
 ### Why excel to R
 
@@ -395,7 +406,7 @@ FANG %>%
 
 Did you know, using "searcher" package, you could automatically to
 search stackoverflow , google, GitHub and many more sites for errors ,
-packages or topics. \#rstats
+packages or topics. #rstats
 
 ```{r}
 library(searcher)
@@ -431,7 +442,7 @@ mtcars %>%
   tabyl(gear)
 ```
 
-\#\#\#**If you only need to use one single function once, you don't need
+##\#**If you only need to use one single function once, you don't need
 to load an entire package. You can write the following:**
 
 **dplyr::full_join(A, B)** **using the :: operator, you can access
@@ -583,10 +594,10 @@ iris <- iris %>%
 ## RStudio and R Markdown tips n tricks
 
 <https://www.r-bloggers.com/2020/01/tips-and-tricks-in-rstudio-and-r-markdown-2/>
-\` \#\#\# Code snippets Code snippets is usually a few characters long
-and is used as a shortcut to insert a common piece of code. You simply
-type a few characters then press Tab and it will complete your code with
-a larger code. Tab is then used again to navigate through the code where
+\` ##\# Code snippets Code snippets is usually a few characters long and
+is used as a shortcut to insert a common piece of code. You simply type
+a few characters then press Tab and it will complete your code with a
+larger code. Tab is then used again to navigate through the code where
 customization is required. For instance, if you type fun then press Tab,
 it will auto-complete the code with the required code to create a
 function:
@@ -1251,7 +1262,7 @@ crossing(
   knitr::kable()
 ```
 
-## 10 Tidyverse Functions - \#2 Across (w/ Group By + Summarize) \| R-Tip 009
+## 10 Tidyverse Functions - #2 Across (w/ Group By + Summarize) \| R-Tip 009
 
 <https://www.youtube.com/watch?v=6fEowYTlNT8&feature=youtu.be&utm_source=Business+Science+-+Combined+List&utm_campaign=39c1ab56f1-TUES_TIPS_009_tidyverse_across&utm_medium=email&utm_term=0_a4e5b7c52f-39c1ab56f1-70778887&mc_cid=39c1ab56f1&mc_eid=38d91c3e27>
 
@@ -1340,9 +1351,9 @@ ggpThe tidyverse has a collection of packages to deal with messy data
 (see dplyr and tidyr in particular) AND a philosophy that helps you in
 doing so
 
-\#\#PURRR i.e. purrr \#\#\# group_walk Yesterday my boss asked me to
+##PURRR i.e. purrr ##\# group_walk Yesterday my boss asked me to
 separate data so each member had their own data file. For a moment I
-thought of using Excel but thought "\#rstats can easily do that"
+thought of using Excel but thought "#rstats can easily do that"
 
 You can even use the {gt} Packageto save pdfs!
 <https://twitter.com/Edgar_Zamora_/status/1405559489663684610>
@@ -1370,7 +1381,7 @@ ggplot2::diamonds %>%
                       zoom = .85))
 ```
 
-\#\#DPLYR/dplyr
+##DPLYR/dplyr
 
 ##### dplyr::summarise_at()
 
@@ -1777,10 +1788,12 @@ df %>%
   with_groups(x, ~mutate(.x, mean = mean(y)))
 
 ```
+
 #### dplyr::rename_with
 
-Want to change multiple column names of your data frame using a vector? {dplyr}'s rename_with() is everything() 
-https://twitter.com/ivelasq3/status/1426538010225561607/photo/1
+Want to change multiple column names of your data frame using a vector?
+{dplyr}'s rename_with() is everything()
+<https://twitter.com/ivelasq3/status/1426538010225561607/photo/1>
 
 ```{r}
 library(dplyr)
@@ -1798,7 +1811,7 @@ data %>%
 Have a dataset(ds) with many columns, but want to sort the cols
 alphabetically? E.g. maybe we want to understand what the field contains
 against a glossary/dictionary. We may use dplyr::select() together with
-sort(colnames()) to get a ds with alphabetically sorted cols. \#rstats
+sort(colnames()) to get a ds with alphabetically sorted cols. #rstats
 
 ```{r}
 iris %>% 
@@ -1855,7 +1868,7 @@ help(package = "flextable") help(package = )
 
 ### dplyr 1.0.4 two new functions if_all() and if_any(), and improved performance improvements of across().
 
-[blog link]
+\[blog link\]
 (<https://www.tidyverse.org/blog/2021/02/dplyr-1-0-4-if-any/>)
 
 across() is very useful within summarise() and mutate(), but it's hard
@@ -3166,7 +3179,6 @@ mtcars %>%
 will test across all columns of mtcars whether the column has a mean
 greater than 20.
 
-
 # Packages
 
 ## STRINGR_stringr
@@ -3187,20 +3199,18 @@ woke_strings
 
 ```
 
-
 ## regexplain
-https://www.garrickadenbuie.com/project/regexplain/
+
+<https://www.garrickadenbuie.com/project/regexplain/>
 
 devtools::install_github("gadenbuie/regexplain")
 
-# GGPLOT2|ggplot2
+# GGPLOT2\|ggplot2
 
 ## Colors in ggplot2
 
-scale_color_manual for categorical data
-scale_color_gradient
+scale_color_manual for categorical data scale_color_gradient
 scale_color_graident2
-
 
 ### coolor.co
 
@@ -3360,7 +3370,7 @@ diamonds %>%
 
 ```
 
-What you need to know about \#\# ggplot2/Visualization
+What you need to know about ## ggplot2/Visualization
 
 ```{r}
 # Packages and help pages
@@ -3377,9 +3387,9 @@ I have got tasks like that in my RStudio code snippets, each startin
 with myg\_ so I can search using autocomplete on my own system, Seems
 slightly faster than searching Google or Stack over fllow
 
-Here's a fun \#rstats design pattern I've become more and more fond of:
-use magrittr's %T\>% tee operator to keep returning the original value
-in the chain of functions so you can do multiple things at once, like
+Here's a fun #rstats design pattern I've become more and more fond of:
+use magrittr's %T>% tee operator to keep returning the original value in
+the chain of functions so you can do multiple things at once, like
 saving a ggplot in multiple formats
 
 ```{r}
@@ -3546,21 +3556,20 @@ extract the information they hold. You can create visualization with
 
 <https://cran.r-project.org/web/packages/esquisse/readme/README.html>
 
-
 # ganttrify package for gantt chart
 
-https://ganttrify.europeandatajournalism.eu/
+<https://ganttrify.europeandatajournalism.eu/>
 
 # Blogdown
 
 ## Rmarkdown/Bookdown
 
 ### Rmarkdown books
+
     * [R Markdown: The Definitive Guide](https://bookdown.org/yihui/rmarkdown/)
     * [RMarkdown for Scientists by Nicholas Tierney](https://rmd4sci.njtierney.com/)
     * [bookdown: Authoring Books and Technical Documents with R Markdown](https://bookdown.org/yihui/bookdown/)
     * [Dynamic Documents with R and knitr](https://www.routledge.com/Dynamic-Documents-with-R-and-knitr/Xie/p/book/9781498716963)
-    
 
 ### knitr::stitch
 
@@ -3664,9 +3673,9 @@ setwd(here())
 getwd()
 ```
 
-\#\#usethis \#\#\# `usethis::use_blank_slate()` sets your @rstudio
+##usethis ##\# `usethis::use_blank_slate()` sets your @rstudio
 preference to NEVER save/restore .RData on exit/startup, which is a
-lifestyle endorsed by many \#rstats folks (including me).
+lifestyle endorsed by many #rstats folks (including me).
 
 Just did a clean install and got my first chance to use this on my own
 behalf <https://usethis.r-lib.org/reference/use_blank_slate.html>
@@ -3683,12 +3692,9 @@ workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/).
 use_blank_slate(scope = c("user", "project")) Arguments scope\
 Edit globally for the current user, or locally for the current project
 
-
 ## tidyexplain animated joins
 
-https://github.com/gadenbuie/tidyexplain/tree/master/images
-
-
+<https://github.com/gadenbuie/tidyexplain/tree/master/images>
 
 ## Others/General/Non-Categorized
 
@@ -3703,9 +3709,8 @@ reactable(iris,searchable = TRUE, minRows = 10)
 [How to Make Beautiful Tables in
 R](https://rfortherestofus.com/2019/11/how-to-make-beautiful-tables-in-r/)
 
-A happy \#rstats accident I made today making a reprex. What happens
-when you make a reprex of nothing? Happy Wednesday to you too
-@JennyBryan !
+A happy #rstats accident I made today making a reprex. What happens when
+you make a reprex of nothing? Happy Wednesday to you too @JennyBryan !
 
 ```{r}
 sprintf("Happy %s!", weekdays(Sys.Date()))
@@ -3781,54 +3786,46 @@ git status
 <https://rviews.rstudio.com/2020/04/23/10-commands-to-get-started-with-git/>
 
 ### Git Github and RStudio Cloud
-reference link
-https://www.youtube.com/watch?v=w6fivjMGZVo
 
-Step 1: 
-Step 2: git config --global user.email "onkaronkar4@gmail.com"
-Step 3: git config --global user.name "os2137"
-Step 4: git add . 
-step 5: git commit -m "first commit or such" 
-Step 6: git push
-Step 7: use the username  os2137 when prompted
-Step 8: use the Personal Access Token as Password
+reference link <https://www.youtube.com/watch?v=w6fivjMGZVo>
 
-
+Step 1: Step 2: git config --global user.email
+"[onkaronkar4\@gmail.com](mailto:onkaronkar4@gmail.com){.email}" Step 3:
+git config --global user.name "os2137" Step 4: git add . step 5: git
+commit -m "first commit or such" Step 6: git push Step 7: use the
+username os2137 when prompted Step 8: use the Personal Access Token as
+Password
 
 Use this link to set up a Personal Access Token
-https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+<https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token>
 
-Use this link to check whether you have HTTPS or not I have it as evidenced from 
-repo link
-https://docs.github.com/en/get-started/getting-started-with-git/managing-remote-repositories#switching-remote-urls-from-ssh-to-https
-
+Use this link to check whether you have HTTPS or not I have it as
+evidenced from repo link
+<https://docs.github.com/en/get-started/getting-started-with-git/managing-remote-repositories#switching-remote-urls-from-ssh-to-https>
 
 related community question
-https://community.rstudio.com/t/github-authentication-from-rstudio-cloud-after-august-13/103253
-
+<https://community.rstudio.com/t/github-authentication-from-rstudio-cloud-after-august-13/103253>
 
 ## Useful git pre-commit hooks for R
-https://cran.r-project.org/web/packages/precommit/readme/README.html
-to solve the issue i used the followings: 
- reticulate::install_miniconda()
- precommit::install_precommit()
- precommit::use_precommit()
- but this crated some problem which after a lot of trial and error was solved by the following line of code in the terminal whcih seems to have fixed the file path
- 
- git config --global core.hooksPath '~/.githooks'
- refeence link for this: https://stackoverflow.com/questions/20609816/git-pre-commit-hook-not-running-on-windows/31872301
- 
- Useful video for using library(usethis) function to set up of file
- Personal Access Token under the rprofile
- 
- ?use_github
- has links to set up pat link which we can also find on google search
- edit_r_environ()
- then use
- use_github(protocol = "https", auth_token = sys.getenv("GITHUB_PAT"))
- where GITHUB_PAT is the name of the variable under which PAT has been saved using edit_r_environ()
- https://www.youtube.com/watch?v=kL6L2MNqPHg
- 
- 
- 
-https://www.dev2qa.com/how-to-fix-importerror-dll-load-failed-while-importing-_sqlite3-the-specified-module-could-not-be-found/
+
+<https://cran.r-project.org/web/packages/precommit/readme/README.html>
+to solve the issue i used the followings:
+reticulate::install_miniconda() precommit::install_precommit()
+precommit::use_precommit() but this crated some problem which after a
+lot of trial and error was solved by the following line of code in the
+terminal whcih seems to have fixed the file path
+
+git config --global core.hooksPath '\~/.githooks' refeence link for
+this:
+<https://stackoverflow.com/questions/20609816/git-pre-commit-hook-not-running-on-windows/31872301>
+
+Useful video for using library(usethis) function to set up of file
+Personal Access Token under the rprofile
+
+?use_github has links to set up pat link which we can also find on
+google search edit_r\_environ() then use use_github(protocol = "https",
+auth_token = sys.getenv("GITHUB_PAT")) where GITHUB_PAT is the name of
+the variable under which PAT has been saved using edit_r\_environ()
+<https://www.youtube.com/watch?v=kL6L2MNqPHg>
+
+<https://www.dev2qa.com/how-to-fix-importerror-dll-load-failed-while-importing-_sqlite3-the-specified-module-could-not-be-found/>

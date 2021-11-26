@@ -26,12 +26,6 @@ glimpse(s2s)
 ```
 
 
-```{r}
-
-```
-
-
-
 
 
 ```{r}
@@ -56,7 +50,9 @@ budget_actual_per_category <-  budget %>%
   group_by(country, parent_category, category) %>% 
   summarize(across(c(original_budget:expenditures_to_date), sum, na.rm =T)) %>% 
   select(country, parent_category, category, original_budget, actual_expenditures ) %>%
-  filter(across(c(original_budget, actual_expenditures), ~.x>0)) %>% 
+  rowwise() %>% 
+  mutate(rowsum = original_budget + actual_expenditures) %>% 
+  filter(rowsum >0) %>% 
   show_in_excel()
   
 ```
