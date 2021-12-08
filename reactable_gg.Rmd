@@ -14,6 +14,8 @@ library(lubridate)
 library(scales)
 options(scipen = 0) # to remove scientific notation of numbers. 
 library(DT)
+library(lobstr)
+library(arrow)
 
 show_in_excel <- function(.data){
   if (interactive()) { # avoid unwanted Excel's executions
@@ -29,12 +31,19 @@ mtcars %>%
   dplyr::select(1:2)
 ```
 
+## show_sheets
+```{r}
+path = "live_grants.xlsx"
 
+sheet_names <- readxl::excel_sheets(path)
+sheet_names
+```
 
 
 
 ## Reactable Grouping and Aggregation
 You can group rows in a table by specifying one or more columns in groupBy:
+
 
 ## S2S by Grant Country FY
 ```{r}
@@ -43,8 +52,19 @@ s2s_actual <-
   readxl::read_xlsx("live_grants.xlsx", sheet = "s2s_actuals") %>%
   janitor::clean_names() %>%
   mutate(report_date = as_date(report_date))
+```
 
 
+```{r}
+lobstr::obj_size(s2s_actual)
+# arrow::arrow_info()
+
+s2s_actual<- arrow_table(s2s_actual)
+lobstr::obj_size(s2s_actual)
+```
+
+
+```{r}
 processed_actual <- s2s_actual %>%
   mutate(report_date = ymd(report_date), 
  
