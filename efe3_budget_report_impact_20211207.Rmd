@@ -50,7 +50,39 @@ budget_actual_per_country <- budget %>%
 
 ```
 
-## budget parent cateogry
+## total 
+
+```{r}
+budget %>% 
+   summarize(total_available_budget = sum (available_budget),
+            total_original_budget = sum(original_budget), 
+            total_actual_expenditure = sum(actual_expenditures)
+            )
+```
+
+## year
+
+```{r}
+budget %>% 
+  group_by(year) %>% 
+  summarize(total_available_budget = sum (available_budget),
+            total_original_budget = sum(original_budget), 
+            total_actual_expenditure = sum(actual_expenditures)
+            )
+```
+
+## country
+
+```{r}
+budget %>% 
+  group_by(country) %>% 
+  summarize(total_available_budget = sum (available_budget),
+            total_original_budget = sum(original_budget), 
+            total_actual_expenditure = sum(actual_expenditures)
+            )
+```
+
+## parent cateogry
 
 ```{r}
 budget_actual_per_category <-  budget %>% 
@@ -60,9 +92,8 @@ budget_actual_per_category <-  budget %>%
   rowwise() %>% 
   mutate(available_funds = original_budget- actual_expenditures) %>% 
   filter(available_funds >0) %>% 
-  janitor::adorn_totals() %>% 
-  
-  show_in_excel()
+  janitor::adorn_totals() 
+ 
 ```
 
 
@@ -76,5 +107,26 @@ budget_actual_per_category <-  budget %>%
   rowwise() %>% 
   mutate(available_funds = original_budget- actual_expenditures) %>% 
   filter(available_funds >0)
+```
+
+
+
+```{r}
+budget %>% 
+  group_by(year, country, parent_category) %>% 
+  summarize(total_available_budget = sum (available_budget),
+            total_original_budget = sum(original_budget), 
+            total_actual_expenditure = sum(actual_expenditures)
+            )
+```
+
+## country year
+```{r}
+budget %>% 
+  group_by(country,  year) %>% 
+  summarize(total_available_budget = sum (available_budget),
+            total_original_budget = sum(original_budget), 
+            total_actual_expenditure = sum(actual_expenditures)
+            )
 ```
 

@@ -9,3 +9,96 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+see vignette("tabyls") for details
+
+
+```{r}
+library(dplyr)
+humans <- starwars %>% 
+  filter(species == "Human")
+
+glimpse(humans)
+```
+
+
+# One-way tabyl
+
+Tabulating a single variable is the simplest kind of tabyl
+
+```{r}
+library(janitor)
+
+t1 <- humans %>% 
+  tabyl(eye_color)
+```
+
+When NA values are present, tabyl() also displays “valid” percentages, i.e., with missing values removed from the denominator. And while tabyl() is built to take a data.frame and column names, you can also produce a one-way tabyl by calling it directly on a vector:
+
+```{r}
+x <- c("big", "big", "small", "small", "small", NA)
+tabyl(x)
+```
+
+Most adorn_ helper functions are built for 2-way tabyls, but those that make sense for a 1-way tabyl do work:
+
+```{r}
+t1 %>% 
+  adorn_totals("row") %>% 
+  adorn_pct_formatting()
+```
+
+# Two-way tabyl
+
+This is often called a “crosstab” or “contingency” table. Calling tabyl on two columns of a data.frame produces the same result as the common combination of dplyr::count(), followed by tidyr::pivot_wider() to wide form:
+
+```{r}
+t2 <- humans %>% 
+  tabyl(gender, eye_color)
+```
+
+
+```{r}
+humans %>% count(gender, eye_color) %>% 
+  tidyr::pivot_wider(names_from = eye_color, values_from = n)
+```
+
+Since it’s a tabyl, we can enhance it with adorn_ helper functions. For instance:
+
+```{r}
+t2 %>% 
+  adorn_percentages("row") %>% 
+  adorn_pct_formatting(digts = 2) %>% 
+  adorn_ns()
+```
+
+Adornments have options to control axes, rounding, and other relevant formatting choices (more on that below).
+
+# Three-way tabyl
+
+Just as table() accepts three variables, so does tabyl(), producing a list of tabyls:
+
+```{r}
+t3 <- humans %>%
+  tabyl(eye_color, skin_color, gender)
+
+```
+
+If the adorn_ helper functions are called on a list of data.frames - like the output of a three-way tabyl call - they will call purrr::map() to apply themselves to each data.frame in the list:
+
+```{r}
+library(purrr)
+humans %>%
+  tabyl(eye_color, skin_color, gender, show_missing_levels = FALSE) %>%
+  adorn_totals("row") %>%
+  adorn_percentages("all") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns %>%
+  adorn_title
+```
+
+
+
+
+
+
+
