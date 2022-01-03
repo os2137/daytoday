@@ -7,6 +7,10 @@ output:
 
 
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
 ```{r , include = FALSE, tidy = TRUE}
 library(tidyverse)
 library(reactable)
@@ -14,21 +18,22 @@ library(lubridate)
 library(scales)
 options(scipen = 0) # to remove scientific notation of numbers. 
 library(DT)
-library(lobstr)
-library(arrow)
+library(writexl)
+# library(lobstr)
+# library(arrow)
 
-show_in_excel <- function(.data){
-  if (interactive()) { # avoid unwanted Excel's executions
-    temp <- tempfile(fileext = ".csv") # extension embedded directly
-    readr::write_excel_csv(.data, temp) # add BOM for Excel's pleasure
-    fs::file_show(temp)
-    }
- .data # so that we can continue piping 
-}
-
-mtcars %>% 
-  show_in_excel() %>% 
-  dplyr::select(1:2)
+# show_in_excel <- function(.data){
+#   if (interactive()) { # avoid unwanted Excel's executions
+#     temp <- tempfile(fileext = ".csv") # extension embedded directly
+#     readr::write_excel_csv(.data, temp) # add BOM for Excel's pleasure
+#     fs::file_show(temp)
+#     }
+#  .data # so that we can continue piping 
+# }
+# 
+# mtcars %>% 
+#   show_in_excel() %>% 
+#   dplyr::select(1:2)
 ```
 
 ## Show sheets
@@ -120,7 +125,7 @@ payment <-
     fiscal_year_actual = due_date_year_actual + adjustment
   ) %>% 
 select(
-    friendly_name, funding_foundation, scheduled_amount_amount, actual_amount_amount, scheduled_payment_date, actual_payment_date, fiscal_year_scheduled, fiscal_year_actual
+    organization_name, friendly_name, funding_foundation, scheduled_amount_amount, actual_amount_amount, scheduled_payment_date, actual_payment_date, fiscal_year_scheduled, fiscal_year_actual
 ) %>% 
   arrange(friendly_name)
 # Check if any filtered grant by status needs to be included if yes pls revise the filter in the code above
@@ -178,6 +183,17 @@ plotly::ggplotly(g)
 
 ```
 
+#### payment_per_grant_per_fy
+
+```{r}
+payment_per_grant_per_fy <- payment %>% 
+  group_by(fiscal_year_scheduled, fiscal_year_actual,organization_name, friendly_name ) %>% 
+  summarize(across(scheduled_amount_amount:actual_amount_amount, fns = sum, na.rm = T)) %>% 
+  ungroup() %>% 
+  select(organization_name, friendly_name, everything())
+  
+```
+
 ## Payment schedule and actual by Grants
 
 
@@ -202,6 +218,18 @@ payment %>%
   
 ```
 
+## payment_current FY_by_scheduled_date
+
+```{r}
+payment %>% 
+  filter(fiscal_year_scheduled %in% c(2022)) %>% 
+  group_by(friendly_name, fiscal_year_scheduled, fiscal_year_actual, scheduled_payment_date, actual_payment_date) %>% 
+  arrange(scheduled_payment_date) %>% 
+  select(-1, -3) %>% 
+  kableExtra::kable()
+  
+```
+
 
 ## Payment FY total, per Foundation Total, per Grant Total 
 ```{r}
@@ -220,6 +248,8 @@ reactable(
   bordered = TRUE
 )
 ```
+
+
 
 
 
@@ -290,6 +320,14 @@ reactable(reporting %>% arrange(due_date),
 
 ```
 
+## report_current_FY_by_due_date
+
+```{r}
+reporting %>% 
+  filter(due_date_fy %in% c(2022)) %>% 
+    arrange(due_date) %>% 
+  kableExtra::kable()
+```
 
 
 ## S2S by Grant Country FY
@@ -302,13 +340,6 @@ s2s_actual <-
 ```
 
 
-```{r}
-lobstr::obj_size(s2s_actual)
-# arrow::arrow_info()
-
-s2s_actual<- arrow_table(s2s_actual)
-lobstr::obj_size(s2s_actual)
-```
 
 
 ```{r}
@@ -374,9 +405,33 @@ grant_fy_country_t <- grant_fy_country_t %>%
 
 grant_fy_country_t_a <- grant_fy_country_t %>% 
   full_join(grant_fy_country_a, by = c("Grant", "FY", "Country")) # also checked left_join, inner_join yeilds same results
+```
+
+#### s2s_per_grant
+```{r}
+s2s_per_grant <- grant_fy_country_t_a %>% 
+  group_by(Grant) %>% 
+  summarise(across(where(is.numeric), sum, na.rm = T))
+```
+
+```{r}
+s2s_per_grant %>% 
+DT::datatable(filter = "top", extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download')
+      )
+  )
+  )
+```
 
 
-reactable(grant_fy_country_t_a, groupBy = c("Grant", "Country"))
+```{r}
+grant_fy_country_t_a 
+reactable(grant_fy_country_t_a, groupBy = c("Grant"))
 ```
 
 
@@ -399,6 +454,14 @@ reactable(
 )
 ```
 
+#### s2s_per_grant_per_fy
+
+```{r}
+s2s_per_grant_per_fy<- grant_fy_country_t_a %>% group_by(Grant, FY) %>% 
+            summarise(across(where(is.numeric), sum, na.rm = T))
+```
+
+
 ## S2S per FY per Grant
 ```{r}
 fy_grant_t_a<- grant_fy_country_t_a %>% group_by(FY, Grant) %>% 
@@ -419,6 +482,14 @@ groupBy = c("FY", "Grant"),
   bordered = TRUE
 )
 ```
+
+## s2s_per_grant_per_country
+
+```{r}
+s2s_per_grant_per_country<- grant_fy_country_t_a %>% group_by(Grant, Country) %>% 
+            summarise(across(where(is.numeric), sum, na.rm = T))
+```
+
 
 ## S2S Grant FY
 ```{r}
@@ -457,18 +528,150 @@ reactable(grant_fy_t_a, groupBy = c("Grant", "FY"),
 
 
 
-## Organization
+## Organization |Grants| Joined with correct CIT
+### Grant Cash and S2S
+```{r}
+gg_cash_s2s <- gg_grants %>% 
+  left_join(s2s_per_grant, by = c("friendly_name" = "Grant"))
+  
+```
+
+### Grant Payment and S2S per FY
+```{r}
+glimpse(payment_per_grant_per_fy)
+```
+
 
 ```{r}
-# gg_grants
+gg_grants_org <- gg_grants %>% select(organization_name, friendly_name)
+  
+s2s_per_grant_per_org_per_fy <-   gg_grants_org %>% 
+    left_join( s2s_per_grant_per_fy, by = c("friendly_name" = "Grant") ) 
+
+gg_cash_s2s_per_fy <-payment_per_grant_per_fy %>% 
+  mutate(fiscal_year_scheduled = as.factor(fiscal_year_scheduled), 
+    fiscal_year_actual = as.factor(fiscal_year_actual)) %>%    
+  # mutate(across(fiscal_year_scheduled:fiscal_year_actual, as.factor)) %>% 
+    full_join(s2s_per_grant_per_org_per_fy, by = c("organization_name" = "organization_name", "friendly_name" = "friendly_name", "fiscal_year_scheduled" = "FY") ) 
+```
+
+
+#### JA
+
+```{r}
+ja <- gg_cash_s2s %>% 
+  filter(organization_name %in% c("Junior Achievement", "Junior Achievement Worldwide"))
+```
+
+#### JA per FY
+
+```{r}
+ja_fy <- gg_cash_s2s_per_fy %>% 
+    filter(organization_name %in% c("Junior Achievement", "Junior Achievement Worldwide")) 
+```
+
+#### JA Total Summary 
+```{r}
+plan_cash_s2s_summary <- ja %>% 
+    summarize(total_gg_cash = sum(target_cash_amount_amount), 
+              Connected_actual_ytd =  sum(Connected_Actual, na.rm = T), 
+            Improved_actual_ytd =  sum(Improved_Actual, na.rm = T),
+            Transformed_actual_ytd =  sum(Transformed_Actual, na.rm = T)
+              )
+```
+
+#### Plan
+```{r}
+plan <- gg_cash_s2s %>% 
+  filter(organization_name == "Plan International")	
+
+```
+
+
+#### Plan per FY
+
+```{r}
+plan_fy <- gg_cash_s2s_per_fy %>% 
+    filter(organization_name == "Plan International")
+```
+
+
+#### Plan Total Summary 
+```{r}
+plan_cash_s2s_summary <- plan %>% 
+    summarize(total_gg_cash = sum(target_cash_amount_amount), 
+              Connected_actual_ytd =  sum(Connected_Actual, na.rm = T), 
+            Improved_actual_ytd =  sum(Improved_Actual, na.rm = T),
+            Transformed_actual_ytd =  sum(Transformed_Actual, na.rm = T)
+              )
+```
+
+
+### Save
+
+```{r}
+stc <- gg_cash_s2s %>% 
+  filter(organization_name == "Save the Children")
 ```
 
 
 
+#### Save Total Summary
+```{r}
+stc_cash_s2s_summary <- stc %>% 
+  filter (!friendly_name %in% c("SAVE 6 Next Gen", "SAVE 7 Next Gen")) %>% 
+    summarize(total_gg_cash = sum(target_cash_amount_amount), 
+              Connected_actual_ytd =  sum(Connected_Actual), 
+            Improved_actual_ytd =  sum(Improved_Actual),
+            Transformed_actual_ytd =  sum(Transformed_Actual)
+              )
+```
+
+#### Save per FY
+
+```{r}
+stc_fy <- gg_cash_s2s_per_fy %>% 
+    filter(organization_name == "Save the Children")
+```
+
+#### YBI
+```{r}
+ybi <- gg_cash_s2s %>% 
+  filter(organization_name == "Youth Business International")	
+
+```
 
 
+### YBI Total Summary 
+```{r}
+ybi_cash_s2s_summary <- ybi %>% 
+    summarize(total_gg_cash = sum(target_cash_amount_amount), 
+              Connected_actual_ytd =  sum(Connected_Actual, na.rm = T), 
+            Improved_actual_ytd =  sum(Improved_Actual, na.rm = T),
+            Transformed_actual_ytd =  sum(Transformed_Actual, na.rm = T)
+              )
+```
+
+#### YBI per FY
+
+```{r}
+ybi_fy <- gg_cash_s2s_per_fy %>% 
+    filter(organization_name == "Youth Business International")
+```
 
 
+#### Write multiple excel files
+
+```{r}
+writexl::write_xlsx(path = "multiplefiles.xlsx", x = list(
+  stc = stc, 
+  stc_cash_s2s_summary = stc_cash_s2s_summary, 
+  stc_fy = stc_fy,
+  ybi = ybi,
+  ybi_cash_s2s_summary =  ybi_cash_s2s_summary,
+  ybi_fy =  ybi_fy
+))
+```
 
 ```{r}
 knitr::knit_exit()
@@ -482,8 +685,7 @@ payment%>%
   rowwise() %>% 
   mutate(scheduled_actual_fiscal_diff = 
            fiscal_year_actual - fiscal_year_scheduled) %>% 
-  filter(scheduled_actual_fiscal_diff != 0) %>% 
-  show_in_excel()
+  filter(scheduled_actual_fiscal_diff != 0) 
 ```
 
 ### Payments where the scheduled amount and actual amount are different. 
